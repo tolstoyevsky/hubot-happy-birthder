@@ -1,5 +1,5 @@
 // Description
-//   Birthday bot for Hubot using Tenor GIFs.
+//   Hubot script for writing birthday messages to users. It uses Tenor GIFs to make the messages more lively.
 //
 // Commands:
 //   list birthdays - shows a list of users and their birthdays

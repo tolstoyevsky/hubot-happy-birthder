@@ -1,6 +1,6 @@
 {
   "name": "hubot-birthday",
-  "description": "A hubot script to tell Happy Birthday at an appropriate time.",
+  "description": "Hubot script for writing birthday messages to users",
   "version": "0.0.1",
   "author": "6r1d",
   "license": "MIT",
