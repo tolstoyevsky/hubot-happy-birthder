@@ -1,0 +1,23 @@
+{
+  "name": "hubot-birthday",
+  "description": "A hubot script to tell Happy Birthday at an appropriate time.",
+  "version": "0.0.1",
+  "author": "6r1d",
+  "license": "MIT",
+  "keywords": [
+      "hubot",
+      "hubot-scripts"
+  ],
+  "repository": {
+      "type": "git",
+      "url": "git://github.com/6r1d/hubot-birthday.git"
+  },
+  "bugs": {
+      "url": "https://github.com/6r1d/hubot-birthday/issues"
+  },
+  "dependencies": {
+      "moment": "^2.22.2",
+      "node-schedule": "^0.6.0",
+      "node-fetch": "^2.1.2"
+  }
+}
