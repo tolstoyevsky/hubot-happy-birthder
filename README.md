@@ -1,5 +1,6 @@
 # hubot-birthday
-Adds birthday reminders to Hubot.
+
+Hubot script for writing birthday messages to users. It uses [Tenor](https://tenor.com) GIFs to make the messages more lively.
 
 ## Sample Interaction
 
