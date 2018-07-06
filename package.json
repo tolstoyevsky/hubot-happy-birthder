@@ -10,10 +10,10 @@
   ],
   "repository": {
       "type": "git",
-      "url": "git://github.com/6r1d/hubot-birthday.git"
+      "url": "git://github.com/tolstoyevsky/hubot-happy-birthder.git"
   },
   "bugs": {
-      "url": "https://github.com/6r1d/hubot-birthday/issues"
+      "url": "https://github.com/tolstoyevsky/hubot-happy-birthder/issues"
   },
   "dependencies": {
       "moment": "^2.22.2",
