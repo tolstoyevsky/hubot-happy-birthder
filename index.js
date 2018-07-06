@@ -13,14 +13,14 @@ const schedule = require('node-schedule');
 const moment = require('moment');
 const n_fetch = require('node-fetch');
 
-const TENOR_API_KEY = process.env.TENOR_API_KEY || False;
-const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || False;
-const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || False;
-const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || False;
-const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || False;
+const TENOR_API_KEY = process.env.TENOR_API_KEY || false;
+const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || false;
+const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || false;
+const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || false;
+const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || false;
 // Time and measure of it to announce birthdays in advance. For example, 7 days.
-const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT || False;
-const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || False;
+const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT || false;
+const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || false;
 
 const MSG_UNABLE_TO_LOCATE_USERS = `Не могу найти пользователей с этим днём рождения.`;
 const MSG_BIRTHDAYS_UNKNOWN = `Пока я ещё ничего не знаю про дни рождения!`;
