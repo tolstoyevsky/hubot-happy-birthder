@@ -5,6 +5,7 @@
 //   list birthdays - shows a list of users and their birthdays
 //   birthday set <username> <date>/<month>/<year> - sets a birthday for the user
 //   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date
+//   birthday delete <username> - deletes birthday for the user
 //
 // Author:
 //   6r1d
@@ -81,6 +82,7 @@ async function grab_tenor_image() {
 module.exports = function (robot) {
     let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
     let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
+    let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i; 
 
     // returns `true` if two dates have the same month and day of month
     check_dates_equal = function (dayA, dayB) {
@@ -151,6 +153,23 @@ module.exports = function (robot) {
             return msg.send(resp);
         } else {
             return msg.send(MSG_UNABLE_TO_LOCATE_USERS);
+        }
+    });
+
+    // Delete someone's birthday
+    robot.hear(delete_regex, function (msg) {
+        var date, name, user, users;
+        name = msg.match[2];
+
+        users = robot.brain.usersForFuzzyName(name);
+        if (users.length === 1) {
+            user = users[0];
+            user.date_of_birth = null;
+            return msg.send(`Удаляю день рождения ${name}`);
+        } else if (users.length > 1) {
+            return msg.send(getAmbiguousUserText(users));
+        } else {
+            return msg.send(`${name}? Кто это?`);
         }
     });
 
