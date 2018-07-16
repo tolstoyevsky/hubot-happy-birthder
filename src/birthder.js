@@ -71,7 +71,10 @@
         // TODO process output for the wrong key, invalid input and so on
         anon_id = tenor_key_response.anon_id;
 
-        let search_url = "https://api.tenor.com/v1/search?tag=%{TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anon_id}";
+        let search_url = "https://api.tenor.com/v1/search?tag=" +
+            TENOR_SEARCH_TERM + "&key=" +
+            TENOR_API_KEY + "&limit=" +
+            TENOR_IMG_LIMIT + "&anon_id=" + anon_id;
         // TODO process invalid inputs:
         // check if response might be parsed as JSON,
         // check if input dict contains required keys
@@ -127,6 +130,25 @@
             name = msg.match[2];
             date = msg.match[3];
             users = robot.brain.usersForFuzzyName(name);
+
+            function nanana() {
+                let birthday_users, i, idx, len, msg, user;
+                birthday_users = find_users_born_on_date(moment(), robot.brain.data.users);
+                let birthday_announcement = function (image_url) {
+                    general_birthday_announcement(robot, birthday_users, image_url);
+                };
+                // Use Tenor images if possible, ignore images otherwise
+                if (TENOR_API_KEY && TENOR_IMG_LIMIT && TENOR_SEARCH_TERM) {
+                    grab_tenor_image().then(birthday_announcement).catch(
+                        function (err) {
+                            console.error(err);
+                        });
+                } else {
+                    birthday_announcement(birthday_users);
+                }
+            }
+
+            nanana();
             if (users.length === 1) {
                 user = users[0];
                 user.date_of_birth = date;
