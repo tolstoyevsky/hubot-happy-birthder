@@ -1,4 +1,4 @@
-// Description
+// Description:
 //   Hubot script for writing birthday messages to users. It uses Tenor GIFs to make the messages more lively.
 //
 // Commands:
