@@ -1,11 +1,11 @@
 // Description:
 //   Hubot script for writing birthday messages to users. It uses Tenor GIFs to make the messages more lively.
-//
+
 // Commands:
 //   list birthdays - shows a list of users and their birthdays
 //   birthday set <username> <date>/<month>/<year> - sets a birthday for the user
 //   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date
-//
+
 // Author:
 //   6r1d
 
