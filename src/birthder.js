@@ -56,46 +56,66 @@
         "Happy Birthday on your very special day, I hope that you don't die before you eat your cake."
     ];
 
-    // Selects random image URI from a list of images (returned by the search)
-    function select_tenor_image_url(response_objects) {
-        let top_anims = response_objects.results;
-        let rand_anim = top_anims[Math.floor(Math.random() * top_anims.length)];
-        return rand_anim.media[0].gif.url;
-    }
-
-    async function grab_tenor_image() {
-        let img_url, anon_id, response, tenor_key_response;
-        let tenor_key_url = "https://api.tenor.com/v1/anonid?key=" + TENOR_API_KEY;
-
-        response = await n_fetch(tenor_key_url);
-        tenor_key_response = await response.json();
-        // TODO process output for the wrong key, invalid input and so on
-        anon_id = tenor_key_response.anon_id;
-
-        let search_url = "https://api.tenor.com/v1/search?tag=" +
-            TENOR_SEARCH_TERM + "&key=" +
-            TENOR_API_KEY + "&limit=" +
-            TENOR_IMG_LIMIT + "&anon_id=" + anon_id;
-        // TODO process invalid inputs:
-        // check if response might be parsed as JSON,
-        // check if input dict contains required keys
-        response = await n_fetch(search_url);
-        img_url = select_tenor_image_url(await response.json());
-
-        return img_url;
-    }
-
     module.exports = function (robot) {
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
 
-        // returns `true` if two dates have the same month and day of month
-        function check_dates_equal(dayA, dayB) {
-            return (dayA.month() === dayB.month()) && (dayA.date() === dayB.date());
+        /**
+         * Selects random image URI from a list of images (returned by the search)
+         *
+         * @param response {Object} response object from node-fetch package.
+         * @returns {string} image URL
+         */
+        function selectTenorImageUrl(response) {
+            let topAnimals = response.results;
+            let randAnimals = topAnimals[Math.floor(Math.random() * topAnimals.length)];
+            return randAnimals.media[0].gif.url;
         }
 
-        // returns `true` is date string is a valid date
+        /**
+         * Get image url through tenor API.
+         *
+         * @returns {Promise<string|*>}
+         */
+        async function grabTenorImage() {
+            let imageUrl, response, tenorResponse;
+            let tenor_key_url = "https://api.tenor.com/v1/anonid?key=" + TENOR_API_KEY;
+
+            response = await n_fetch(tenor_key_url);
+            tenorResponse = await response.json();
+            // TODO process output for the wrong key, invalid input and so on
+
+            let search_url = "https://api.tenor.com/v1/search?tag=" +
+                TENOR_SEARCH_TERM + "&key=" +
+                TENOR_API_KEY + "&limit=" +
+                TENOR_IMG_LIMIT + "&anon_id=" + tenorResponse.anon_id;
+            // TODO process invalid inputs:
+            // check if response might be parsed as JSON,
+            // check if input dict contains required keys
+            response = await n_fetch(search_url);
+            imageUrl = selectTenorImageUrl(await response.json());
+            return imageUrl;
+        }
+
+        /**
+         * Check if two dates have the same month and day of month.
+         *
+         * @param firstDate {moment) date
+         * @param secondsDate {moment) date
+         * @returns {boolean}
+         */
+        function datesAreEqual(firstDate, secondsDate) {
+            return (firstDate.month() === secondsDate.month())
+                && (firstDate.date() === secondsDate.date());
+        }
+
+        /**
+         * Check if date string is a valid date
+         *
+         * @param date {string} string value of date,
+         * @returns {boolean}
+         */
         function is_valid_birthdate(date) {
             if (date) {
                 if (date.length > 0) {
@@ -107,7 +127,12 @@
             return false;
         }
 
-        // returns `array` of users born on a given date
+        /**
+         * Find users with have the same value in their birthday field with date.
+         * @param date {Date}
+         * @param users {Array} user list
+         * @returns {Array} filtered user list by birthday
+         */
         function find_users_born_on_date(date, users) {
             let uid, matches, user;
             matches = [];
@@ -116,7 +141,7 @@
 
                     user = users[uid];
                     if (is_valid_birthdate(user.date_of_birth)) {
-                        if (check_dates_equal(date, moment(user.date_of_birth, "DD-MM-YYYY"))) {
+                        if (datesAreEqual(date, moment(user.date_of_birth, "DD-MM-YYYY"))) {
                             matches.push(user);
                         }
                     }
@@ -126,7 +151,45 @@
             return matches;
         }
 
-        // Set someone's birthday
+        // TODO quotes for a single birthday, quotes for multiple
+        /**
+         *
+         * @param robot {Object} robot from root function param
+         * @param users {Array} list of users
+         * @param image_url {string} image url
+         * @returns {*}
+         */
+        function general_birthday_announcement(robot, users, image_url) {
+            let msg = image_url ? image_url + `\n` : '';
+            if (users.length === 1) {
+                // send message for one users birthday
+                msg += `<!channel> Сегодня день рождения <@${users[0].name}>!`;
+                msg += `\n${quote()}`;
+            } else if (users.length > 1) {
+                // send message for multiple users birthdays
+                msg += "<!channel> Сегодня день рождения ";
+                for (idx = i = 0, len = users.length; i < len; idx = ++i) {
+                    user = users[idx];
+                    msg += `<@${user.name}>${(idx !== (users.length - 1) ? ", " : "")}`;
+                }
+                msg += "!";
+                msg += `\n${quote()}`;
+            }
+            if (users.length > 0) {
+                return robot.messageRoom("general", msg);
+            }
+        }
+
+        /**
+         * Get random quote from allowed quotes in QUOTES constant.
+         * @param name
+         * @returns {string}
+         */
+        function quote(name) {
+            return QUOTES[(Math.random() * QUOTES.length) >> 0];
+        }
+
+        // Hearing an event for the setting birthday command.
         robot.hear(set_regex, function (msg) {
             let date, name, user, users;
             name = msg.match[2];
@@ -143,7 +206,7 @@
             }
         });
 
-        // Check a birthday using a date
+        /// Hearing an event for checking users with today's birthdays.
         robot.hear(check_regex, function (msg) {
             let date, name, user, users;
             date = msg.match[2];
@@ -179,6 +242,7 @@
             }
         });
 
+        // get users' birthdays
         robot.respond(/birthdays list/i, function (msg) {
             let k, message, user, users;
             users = robot.brain.data.users;
@@ -199,28 +263,6 @@
             }
         });
 
-        // TODO quotes for a single birthday, quotes for multiple
-        function general_birthday_announcement(robot, birthday_users, image_url) {
-            let msg = image_url ? image_url + `\n` : '';
-            if (birthday_users.length === 1) {
-                // send message for one users birthday
-                msg += `<!channel> Сегодня день рождения <@${birthday_users[0].name}>!`;
-                msg += `\n${quote()}`;
-            } else if (birthday_users.length > 1) {
-                // send message for multiple users birthdays
-                msg += "<!channel> Сегодня день рождения ";
-                for (idx = i = 0, len = birthday_users.length; i < len; idx = ++i) {
-                    user = birthday_users[idx];
-                    msg += `<@${user.name}>${(idx !== (birthday_users.length - 1) ? ", " : "")}`;
-                }
-                msg += "!";
-                msg += `\n${quote()}`;
-            }
-            if (birthday_users.length > 0) {
-                return robot.messageRoom("general", msg);
-            }
-        }
-
         // Regularly checks for a birthday, announces to "generic" chat room
         if (BIRTHDAY_CRON_STRING) {
             schedule.scheduleJob(BIRTHDAY_CRON_STRING, function () {
@@ -231,7 +273,7 @@
                 };
                 // Use Tenor images if possible, ignore images otherwise
                 if (TENOR_API_KEY && TENOR_IMG_LIMIT && TENOR_SEARCH_TERM) {
-                    grab_tenor_image().then(birthday_announcement).catch(
+                    grabTenorImage().then(birthday_announcement).catch(
                         function (err) {
                             console.error(err);
                         });
@@ -264,9 +306,5 @@
                 }
             });
         }
-
-        return quote = function (name) {
-            return QUOTES[(Math.random() * QUOTES.length) >> 0];
-        };
     }
 }).call(this);
