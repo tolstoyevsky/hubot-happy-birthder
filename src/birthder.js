@@ -99,7 +99,7 @@
         }
 
         /**
-         * Check if two dates have the same month and day of month.
+         * Check if two dates have the same month and day values.
          *
          * @param firstDate {moment) date
          * @param secondsDate {moment) date
