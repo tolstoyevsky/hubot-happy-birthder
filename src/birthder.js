@@ -179,7 +179,7 @@
             }
         });
 
-        robot.respond(/list birthdays/i, function (msg) {
+        robot.respond(/birthdays list/i, function (msg) {
             let k, message, user, users;
             users = robot.brain.data.users;
             if (users.length === 0) {
