@@ -192,6 +192,9 @@
                         message += `${user.name} родился ${user.date_of_birth}\n`;
                     }
                 }
+                if (!message) {
+                    message = 'Oops... No results.';
+                }
                 return msg.send(message);
             }
         });
