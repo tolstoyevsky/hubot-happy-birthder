@@ -199,9 +199,7 @@
 
         // Delete someone's birthday
         robot.hear(delete_regex, function (msg) {
-            let date, name, user, users;
-            name = msg.match[2];
-
+            let name = msg.match[2], user, users;
             users = robot.brain.usersForFuzzyName(name);
             if (users.length === 1) {
                 user = users[0];
@@ -214,24 +212,14 @@
             }
         });
 
+        // Display users' birthdays
         robot.respond(/birthdays list/i, function (msg) {
-            let k, message, user, users;
-            users = robot.brain.data.users;
-            if (users.length === 0) {
-                return msg.send(MSG_BIRTHDAYS_UNKNOWN);
-            } else {
-                message = "";
-                for (k in users || {}) {
-                    user = users[k];
-                    if (isValidDate(user.date_of_birth)) {
-                        message += `${user.name} родился ${user.date_of_birth}\n`;
-                    }
-                }
-                if (!message) {
-                    message = 'Oops... No results.';
-                }
-                return msg.send(message);
-            }
+            let message, messageItems;
+            messageItems = Object.values(robot.brain.data.users)
+                .filter(user => isValidDate(user.date_of_birth))
+                .map(user => `${user.name} родился ${user.date_of_birth}`);
+            message = messageItems.length === 0 ? 'Oops... No results.' : messageItems.join('\n');
+            return msg.send(message);
         });
 
         // Regularly checks for a birthday, announces to "generic" chat room
