@@ -198,6 +198,7 @@
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
 
+        // Set user's birthday
         robot.hear(set_regex, function (msg) {
             let date, name, user, users;
             name = msg.match[2];
