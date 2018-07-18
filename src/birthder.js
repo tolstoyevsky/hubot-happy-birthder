@@ -8,7 +8,7 @@
 //   None
 //
 // Commands:
-//   list birthdays - shows a list of users and their birthdays
+//   birthdays list - shows a list of users and their birthdays
 //   birthday set <username> <date>/<month>/<year> - sets a birthday for the user
 //   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date
 //   birthday delete <username> - deletes birthday for the user
