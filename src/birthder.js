@@ -160,6 +160,38 @@
         return QUOTES[(Math.random() * QUOTES.length) >> 0];
     }
 
+    /**
+     * Sending announcements of users' birthdays.
+     * Notification will be sent for the all users, excluding users from announcements.
+     *
+     * @param {Object} robot - Robot from root function's param.
+     */
+    function sendAnnouncements(robot) {
+        let targetDay = moment(), userNames, userNamesString,
+            users, message;
+        targetDay.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
+        users = findUsersBornOnDate(targetDay, robot.brain.data.users);
+        userNames = users.map(user => user.name);
+        userNamesString = userNames.map(name => `@${name}`).join(', ');
+        message = `${MSG_BIRTHDAY_IN_A_WEEK} ${userNamesString}: ${targetDay.format(DATE_FORMAT)}.`;
+        for (let user of Object.values(robot.brain.data.users)) {
+            if (userNames.indexOf(user.name) === -1) {
+                robot.adapter.sendDirect({user: {name: user.name}}, message);
+            }
+        }
+    }
+
+    /**
+     * Sending today's messages.
+     * These messages will be posted into the general channel.
+     */
+    function sendCongratulations(robot) {
+        let birthday_users = findUsersBornOnDate(moment(), robot.brain.data.users);
+        grabTenorImage()
+            .then(url => generalBirthdayAnnouncement(robot, birthday_users, url))
+            .catch(e => console.error(e));
+    }
+
     module.exports = function (robot) {
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
@@ -221,37 +253,12 @@
 
         // Regularly checks for a birthday, announces to "generic" chat room
         if (BIRTHDAY_CRON_STRING) {
-            schedule.scheduleJob(BIRTHDAY_CRON_STRING, function () {
-                let birthday_users;
-                birthday_users = findUsersBornOnDate(moment(), robot.brain.data.users);
-                grabTenorImage()
-                    .then(url => generalBirthdayAnnouncement(robot, birthday_users, url))
-                    .catch(e => console.error(e));
-            });
+            schedule.scheduleJob(BIRTHDAY_CRON_STRING, () => sendCongratulations(robot));
         }
 
         // Announce birthdays to each user (except one whose birthday it is) in advance
         if (ANNOUNCER_CRON_STRING) {
-            schedule.scheduleJob(ANNOUNCER_CRON_STRING, function () {
-                // TODO ask if it could be written in one line
-                let after_an_interval, birthday_users, birthday_user,
-                    bday_usr_id;
-                after_an_interval = moment();
-                after_an_interval.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
-                birthday_users = findUsersBornOnDate(after_an_interval, robot.brain.data.users);
-                for (bday_usr_id = 0; bday_usr_id < birthday_users.length; bday_usr_id++) {
-                    birthday_user = birthday_users[bday_usr_id];
-                    let users = robot.brain.data.users;
-                    let msg_text = MSG_BIRTHDAY_IN_A_WEEK + `<@${birthday_user.name}>: ` +
-                        `${after_an_interval.date()}-${after_an_interval.month()}-${after_an_interval.year()}.`;
-                    for (let user_key in users || {}) {
-                        let user = users[user_key];
-                        if (birthday_user.name !== user.name) {
-                            robot.adapter.sendDirect({user: {name: user.name}}, msg_text);
-                        }
-                    }
-                }
-            });
+            schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendAnnouncements(robot));
         }
     }
 }).call(this);
