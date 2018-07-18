@@ -32,7 +32,7 @@
     const MSG_UNABLE_TO_LOCATE_USERS = `Не могу найти пользователей с этим днём рождения.`;
     const MSG_BIRTHDAYS_UNKNOWN = `Пока я ещё ничего не знаю про дни рождения!`;
     const MSG_BIRTHDAY_IN_A_WEEK = `Скоро день рождения у `;
-    const DATE_FORMAT = "DD-MM-YYYY";
+    const DATE_FORMAT = "DD/MM/YYYY";
 
     const QUOTES = [
         "Hoping that your day will be as special as you are.",
