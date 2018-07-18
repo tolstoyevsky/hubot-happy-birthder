@@ -222,20 +222,11 @@
         // Regularly checks for a birthday, announces to "generic" chat room
         if (BIRTHDAY_CRON_STRING) {
             schedule.scheduleJob(BIRTHDAY_CRON_STRING, function () {
-                let birthday_users, i, idx, len, msg, user;
+                let birthday_users;
                 birthday_users = findUsersBornOnDate(moment(), robot.brain.data.users);
-                let birthday_announcement = function (image_url) {
-                    generalBirthdayAnnouncement(robot, birthday_users, image_url);
-                };
-                // Use Tenor images if possible, ignore images otherwise
-                if (TENOR_API_KEY && TENOR_IMG_LIMIT && TENOR_SEARCH_TERM) {
-                    grabTenorImage().then(birthday_announcement).catch(
-                        function (err) {
-                            console.error(err);
-                        });
-                } else {
-                    birthday_announcement(birthday_users);
-                }
+                grabTenorImage()
+                    .then(url => generalBirthdayAnnouncement(robot, birthday_users, url))
+                    .catch(e => console.error(e));
             });
         }
 
