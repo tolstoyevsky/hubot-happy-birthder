@@ -149,7 +149,7 @@
     function generalBirthdayAnnouncement(robot, users, imageUrl) {
         let messageText, userNames = users.map(user => `@${user.name}`);
         if (users.length > 0) {
-            messageText = `${imageUrl||''}\nСегодня день рождения ${userNames.join(', ')}!\n${quote()}`;
+            messageText = `${imageUrl || ''}\nСегодня день рождения ${userNames.join(', ')}!\n${quote()}`;
             robot.messageRoom("general", messageText);
         }
     }
@@ -178,21 +178,14 @@
 
         // Check a birthday using a date
         robot.hear(check_regex, function (msg) {
-            let date, name, user, users;
-            date = msg.match[2];
+            let date = msg.match[2], users;
             users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
-            if (users.length > 0) {
-                let resp = `${date} день рождения у `;
-                for (idx = i = 0, len = users.length; i < len; idx = ++i) {
-                    user = users[idx];
-                    resp += `<@${user.name}>${(idx !== (users.length - 1) ? ", " : "")}`;
-                }
-                resp += ".";
-                resp += `\n${quote()}`;
-                return msg.send(resp);
-            } else {
+            if (users.length === 0) {
                 return msg.send(MSG_UNABLE_TO_LOCATE_USERS);
             }
+            let userNames = users.map(user => `@${user.name}`), message;
+            message = `*${date}* день рождения у ${userNames.join(', ')}\n${quote()}`;
+            return msg.send(message);
         });
 
         // Delete someone's birthday
