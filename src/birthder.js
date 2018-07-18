@@ -18,7 +18,7 @@
 (function () {
     const schedule = require('node-schedule');
     const moment = require('moment');
-    const n_fetch = require('node-fetch');
+    const nFetch = require('node-fetch');
 
     const TENOR_API_KEY = process.env.TENOR_API_KEY || false;
     const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || false;
@@ -68,32 +68,30 @@
         let randomAnimals = animals[Math.floor(Math.random() * animals.length)];
         return randomAnimals.media[0].gif.url;
     }
+
     /**
-    * Get image URL through Tenor API.
-    * It also uses TENOR_API_KEY, TENOR_SEARCH_TERM, TENOR_IMG_LIMIT as request params.
-    *
-    * @returns {Promise<string|*>} image URL
-    */
-    async function grab_tenor_image() {
-        let img_url, anon_id, response, tenor_key_response;
+     * Get image URL through Tenor API.
+     * It also uses TENOR_API_KEY, TENOR_SEARCH_TERM, TENOR_IMG_LIMIT as request params.
+     *
+     * @returns {Promise<string|*>} image URL
+     */
+    async function grabTenorImage() {
+        let imageUrl, anonId, response, tenorResponse;
         let tenor_key_url = "https://api.tenor.com/v1/anonid?key=" + TENOR_API_KEY;
 
-        response = await n_fetch(tenor_key_url);
-        tenor_key_response = await response.json();
+        response = await nFetch(tenor_key_url);
+        tenorResponse = await response.json();
         // TODO process output for the wrong key, invalid input and so on
-        anon_id = tenor_key_response.anon_id;
+        anonId = tenorResponse.anon_id;
 
-        let search_url = "https://api.tenor.com/v1/search?tag=" +
-            TENOR_SEARCH_TERM + "&key=" +
-            TENOR_API_KEY + "&limit=" +
-            TENOR_IMG_LIMIT + "&anon_id=" + anon_id;
+        let searchUrl = "https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}";
         // TODO process invalid inputs:
         // check if response might be parsed as JSON,
         // check if input dict contains required keys
-        response = await n_fetch(search_url);
-        img_url = selectTenorImageUrl(await response.json());
+        response = await nFetch(searchUrl);
+        imageUrl = selectTenorImageUrl(await response.json());
 
-        return img_url;
+        return imageUrl;
     }
 
     module.exports = function (robot) {
@@ -268,7 +266,7 @@
                 };
                 // Use Tenor images if possible, ignore images otherwise
                 if (TENOR_API_KEY && TENOR_IMG_LIMIT && TENOR_SEARCH_TERM) {
-                    grab_tenor_image().then(birthday_announcement).catch(
+                    grabTenorImage().then(birthday_announcement).catch(
                         function (err) {
                             console.error(err);
                         });
