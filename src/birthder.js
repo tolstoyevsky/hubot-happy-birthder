@@ -139,6 +139,20 @@
         return matches;
     }
 
+    /**
+     * Birthday announce for users into GENERAL channel.
+     *
+     * @param {Object} robot - Robot from root function's param.
+     * @param {Array} users - User list.
+     * @param {string} imageUrl - Image url for posting into channel.
+     */
+    function generalBirthdayAnnouncement(robot, users, imageUrl) {
+        let messageText, userNames = users.map(user => `@${user.name}`);
+        if (users.length > 0) {
+            messageText = `${imageUrl||''}\nСегодня день рождения ${userNames.join(', ')}!\n${quote()}`;
+            robot.messageRoom("general", messageText);
+        }
+    }
 
     module.exports = function (robot) {
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
@@ -218,44 +232,13 @@
             }
         });
 
-        // TODO quotes for a single birthday, quotes for multiple
-        // TODO remove unused return type
-        /**
-         * Birthday announce for users into GENERAL channel.
-         *
-         * @param {Object} robot - Robot from root function's param.
-         * @param {Array} birthday_users - User list.
-         * @param {string} image_url - Image url for posting into channel.
-         * @returns {*}
-         */
-        function general_birthday_announcement(robot, birthday_users, image_url) {
-            let msg = image_url ? image_url + `\n` : '';
-            if (birthday_users.length === 1) {
-                // send message for one users birthday
-                msg += `<!channel> Сегодня день рождения <@${birthday_users[0].name}>!`;
-                msg += `\n${quote()}`;
-            } else if (birthday_users.length > 1) {
-                // send message for multiple users birthdays
-                msg += "<!channel> Сегодня день рождения ";
-                for (idx = i = 0, len = birthday_users.length; i < len; idx = ++i) {
-                    user = birthday_users[idx];
-                    msg += `<@${user.name}>${(idx !== (birthday_users.length - 1) ? ", " : "")}`;
-                }
-                msg += "!";
-                msg += `\n${quote()}`;
-            }
-            if (birthday_users.length > 0) {
-                return robot.messageRoom("general", msg);
-            }
-        }
-
         // Regularly checks for a birthday, announces to "generic" chat room
         if (BIRTHDAY_CRON_STRING) {
             schedule.scheduleJob(BIRTHDAY_CRON_STRING, function () {
                 let birthday_users, i, idx, len, msg, user;
                 birthday_users = findUsersBornOnDate(moment(), robot.brain.data.users);
                 let birthday_announcement = function (image_url) {
-                    general_birthday_announcement(robot, birthday_users, image_url);
+                    generalBirthdayAnnouncement(robot, birthday_users, image_url);
                 };
                 // Use Tenor images if possible, ignore images otherwise
                 if (TENOR_API_KEY && TENOR_IMG_LIMIT && TENOR_SEARCH_TERM) {
