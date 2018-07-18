@@ -121,18 +121,15 @@
      * Find users who have the same value in their birthday field with date.
      *
      * @param {Date} date - Date which will be used for comparing.
-     * @param {Array} users - User list.
+     * @param {Object} users - User object where each key is user instance.
      * @returns {Array}
      */
     function findUsersBornOnDate(date, users) {
-        let uid, matches = [], user;
-        for (uid in users || {}) {
-            if (users.hasOwnProperty(uid)) {
-                user = users[uid];
-                if (isValidDate(user.date_of_birth)) {
-                    if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
-                        matches.push(user);
-                    }
+        let matches = [];
+        for (let user of Object.values(users)) {
+            if (isValidDate(user.date_of_birth)) {
+                if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
+                    matches.push(user);
                 }
             }
         }
