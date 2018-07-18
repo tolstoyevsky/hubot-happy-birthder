@@ -30,8 +30,7 @@
     const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || false;
 
     const MSG_UNABLE_TO_LOCATE_USERS = `Не могу найти пользователей с этим днём рождения.`;
-    const MSG_BIRTHDAYS_UNKNOWN = `Пока я ещё ничего не знаю про дни рождения!`;
-    const MSG_BIRTHDAY_IN_A_WEEK = `Скоро день рождения у `;
+    const MSG_BIRTHDAY_IN_A_WEEK = `Скоро день рождения у`;
     const DATE_FORMAT = "DD/MM/YYYY";
 
     const QUOTES = [
