@@ -154,6 +154,15 @@
         }
     }
 
+    /**
+     * Get random quote from the QUOTES array.
+     *
+     * @returns {string}
+     */
+    function quote() {
+        return QUOTES[(Math.random() * QUOTES.length) >> 0];
+    }
+
     module.exports = function (robot) {
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
@@ -268,9 +277,5 @@
                 }
             });
         }
-
-        return quote = function (name) {
-            return QUOTES[(Math.random() * QUOTES.length) >> 0];
-        };
     }
 }).call(this);
