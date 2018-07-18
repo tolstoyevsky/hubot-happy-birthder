@@ -94,21 +94,22 @@
         return imageUrl;
     }
 
+    /**
+     * Check if two dates have the same month and day values.
+     *
+     * @param {moment} firstDate
+     * @param {moment} secondsDate
+     * @returns {boolean}
+     */
+    function isEqualMonthDay(firstDate, secondsDate) {
+        return (firstDate.month() === secondsDate.month()) &&
+            (firstDate.date() === secondsDate.date());
+    }
+
     module.exports = function (robot) {
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
-
-        /**
-         * Check if two dates have the same month and day values.
-         *
-         * @param {moment} dayA
-         * @param {moment} dayB
-         * @returns {boolean}
-         */
-        function check_dates_equal(dayA, dayB) {
-            return (dayA.month() === dayB.month()) && (dayA.date() === dayB.date());
-        }
 
         /**
          * Check if date string is a valid date.
@@ -142,7 +143,7 @@
 
                     user = users[uid];
                     if (is_valid_birthdate(user.date_of_birth)) {
-                        if (check_dates_equal(date, moment(user.date_of_birth, DATE_FORMAT))) {
+                        if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
                             matches.push(user);
                         }
                     }
