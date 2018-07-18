@@ -56,13 +56,23 @@
         "Happy Birthday on your very special day, I hope that you don't die before you eat your cake."
     ];
 
-    // Selects random image URI from a list of images (returned by the search)
+    /**
+     * Select random image URL from a list of images (returned by the search).
+     *
+     * @param {Object} response_objects - Response object from node-fetch package.
+     * @returns {string} image URL
+     */
     function select_tenor_image_url(response_objects) {
         let top_anims = response_objects.results;
         let rand_anim = top_anims[Math.floor(Math.random() * top_anims.length)];
         return rand_anim.media[0].gif.url;
     }
-
+    /**
+    * Get image URL through Tenor API.
+    * It also uses TENOR_API_KEY, TENOR_SEARCH_TERM, TENOR_IMG_LIMIT as request params.
+    *
+    * @returns {Promise<string|*>} image URL
+    */
     async function grab_tenor_image() {
         let img_url, anon_id, response, tenor_key_response;
         let tenor_key_url = "https://api.tenor.com/v1/anonid?key=" + TENOR_API_KEY;
@@ -90,12 +100,23 @@
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
 
-        // returns `true` if two dates have the same month and day of month
+        /**
+         * Check if two dates have the same month and day values.
+         *
+         * @param {moment} dayA
+         * @param {moment} dayB
+         * @returns {boolean}
+         */
         function check_dates_equal(dayA, dayB) {
             return (dayA.month() === dayB.month()) && (dayA.date() === dayB.date());
         }
 
-        // returns `true` is date string is a valid date
+        /**
+         * Check if date string is a valid date.
+         *
+         * @param {string} date
+         * @returns {boolean}
+         */
         function is_valid_birthdate(date) {
             if (date) {
                 if (date.length > 0) {
@@ -107,7 +128,13 @@
             return false;
         }
 
-        // returns `array` of users born on a given date
+        /**
+         * Find users who have the same value in their birthday field with date.
+         *
+         * @param {Date} date - Date which will be used for comparing.
+         * @param {Array} users - User list.
+         * @returns {Array}
+         */
         function find_users_born_on_date(date, users) {
             let uid, matches, user;
             matches = [];
@@ -200,6 +227,15 @@
         });
 
         // TODO quotes for a single birthday, quotes for multiple
+        // TODO remove unused return type
+        /**
+         * Birthday announce for users into GENERAL channel.
+         *
+         * @param {Object} robot - Robot from root function's param.
+         * @param {Array} birthday_users - User list.
+         * @param {string} image_url - Image url for posting into channel.
+         * @returns {*}
+         */
         function general_birthday_announcement(robot, birthday_users, image_url) {
             let msg = image_url ? image_url + `\n` : '';
             if (birthday_users.length === 1) {
