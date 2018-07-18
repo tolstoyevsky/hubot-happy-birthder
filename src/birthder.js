@@ -32,6 +32,7 @@
     const MSG_UNABLE_TO_LOCATE_USERS = `Не могу найти пользователей с этим днём рождения.`;
     const MSG_BIRTHDAYS_UNKNOWN = `Пока я ещё ничего не знаю про дни рождения!`;
     const MSG_BIRTHDAY_IN_A_WEEK = `Скоро день рождения у `;
+    const DATE_FORMAT = "DD-MM-YYYY";
 
     const QUOTES = [
         "Hoping that your day will be as special as you are.",
@@ -120,7 +121,7 @@
         function is_valid_birthdate(date) {
             if (date) {
                 if (date.length > 0) {
-                    if (moment(date, "DD-MM-YYYY").isValid) {
+                    if (moment(date, DATE_FORMAT).isValid) {
                         return true;
                     }
                 }
@@ -143,7 +144,7 @@
 
                     user = users[uid];
                     if (is_valid_birthdate(user.date_of_birth)) {
-                        if (check_dates_equal(date, moment(user.date_of_birth, "DD-MM-YYYY"))) {
+                        if (check_dates_equal(date, moment(user.date_of_birth, DATE_FORMAT))) {
                             matches.push(user);
                         }
                     }
@@ -174,7 +175,7 @@
         robot.hear(check_regex, function (msg) {
             let date, name, user, users;
             date = msg.match[2];
-            users = find_users_born_on_date(moment(date, "DD-MM-YYYY"), robot.brain.data.users);
+            users = find_users_born_on_date(moment(date, DATE_FORMAT), robot.brain.data.users);
             if (users.length > 0) {
                 let resp = `${date} день рождения у `;
                 for (idx = i = 0, len = users.length; i < len; idx = ++i) {
