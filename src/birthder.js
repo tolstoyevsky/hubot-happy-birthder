@@ -60,13 +60,13 @@
     /**
      * Select random image URL from a list of images (returned by the search).
      *
-     * @param {Object} response_objects - Response object from node-fetch package.
+     * @param {Object} response - Response object from node-fetch package.
      * @returns {string} image URL
      */
-    function select_tenor_image_url(response_objects) {
-        let top_anims = response_objects.results;
-        let rand_anim = top_anims[Math.floor(Math.random() * top_anims.length)];
-        return rand_anim.media[0].gif.url;
+    function selectTenorImageUrl(response) {
+        let animals = response.results;
+        let randomAnimals = animals[Math.floor(Math.random() * animals.length)];
+        return randomAnimals.media[0].gif.url;
     }
     /**
     * Get image URL through Tenor API.
@@ -91,7 +91,7 @@
         // check if response might be parsed as JSON,
         // check if input dict contains required keys
         response = await n_fetch(search_url);
-        img_url = select_tenor_image_url(await response.json());
+        img_url = selectTenorImageUrl(await response.json());
 
         return img_url;
     }
