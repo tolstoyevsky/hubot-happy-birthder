@@ -173,9 +173,11 @@
         userNames = users.map(user => user.name);
         userNamesString = userNames.map(name => `@${name}`).join(', ');
         message = `${MSG_BIRTHDAY_IN_A_WEEK} ${userNamesString}: ${targetDay.format(DATE_FORMAT)}.`;
-        for (let user of Object.values(robot.brain.data.users)) {
-            if (userNames.indexOf(user.name) === -1) {
-                robot.adapter.sendDirect({user: {name: user.name}}, message);
+        if (users.length > 0) {
+            for (let user of Object.values(robot.brain.data.users)) {
+                if (userNames.indexOf(user.name) === -1) {
+                    robot.adapter.sendDirect({user: {name: user.name}}, message);
+                }
             }
         }
     }
@@ -195,7 +197,6 @@
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
-
 
         robot.hear(set_regex, function (msg) {
             let date, name, user, users;
