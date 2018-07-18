@@ -194,12 +194,18 @@
     }
 
     module.exports = function (robot) {
-        let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
-        let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
-        let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
+        const regExpUsername = new RegExp(/(?:@?([\w\d .\-_]+)\?*)/),
+            regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/);
+
+        const routes = {
+            set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
+            delete: new RegExp(/(birthday delete)\s+/.source + regExpUsername.source + /\b/.source, 'i'),
+            check: new RegExp(/(birthdays on)\s+/.source + regExpDate.source, 'i'),
+            list: new RegExp(/birthdays list/, 'i')
+        };
 
         // Set user's birthday
-        robot.hear(set_regex, function (msg) {
+        robot.hear(routes.set, function (msg) {
             let date, name, user, users;
             name = msg.match[2];
             date = msg.match[3];
@@ -216,7 +222,7 @@
         });
 
         // Check a birthday using a date
-        robot.hear(check_regex, function (msg) {
+        robot.hear(routes.check, function (msg) {
             let date = msg.match[2], users;
             users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
             if (users.length === 0) {
@@ -228,7 +234,7 @@
         });
 
         // Delete someone's birthday
-        robot.hear(delete_regex, function (msg) {
+        robot.hear(routes.delete, function (msg) {
             let name = msg.match[2], user, users;
             users = robot.brain.usersForFuzzyName(name);
             if (users.length === 1) {
@@ -243,7 +249,7 @@
         });
 
         // Display users' birthdays
-        robot.respond(/birthdays list/i, function (msg) {
+        robot.respond(routes.list, function (msg) {
             let message, messageItems;
             messageItems = Object.values(robot.brain.data.users)
                 .filter(user => isValidDate(user.date_of_birth))
