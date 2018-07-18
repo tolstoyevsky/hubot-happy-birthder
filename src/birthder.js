@@ -117,38 +117,35 @@
         return typeof date === "string" && moment(date, DATE_FORMAT, true).isValid();
     }
 
+    /**
+     * Find users who have the same value in their birthday field with date.
+     *
+     * @param {Date} date - Date which will be used for comparing.
+     * @param {Array} users - User list.
+     * @returns {Array}
+     */
+    function findUsersBornOnDate(date, users) {
+        let uid, matches = [], user;
+        for (uid in users || {}) {
+            if (users.hasOwnProperty(uid)) {
+                user = users[uid];
+                if (isValidDate(user.date_of_birth)) {
+                    if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
+                        matches.push(user);
+                    }
+                }
+            }
+        }
+        return matches;
+    }
+
+
     module.exports = function (robot) {
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
 
 
-        /**
-         * Find users who have the same value in their birthday field with date.
-         *
-         * @param {Date} date - Date which will be used for comparing.
-         * @param {Array} users - User list.
-         * @returns {Array}
-         */
-        function find_users_born_on_date(date, users) {
-            let uid, matches, user;
-            matches = [];
-            for (uid in users || {}) {
-                if (users.hasOwnProperty(uid)) {
-
-                    user = users[uid];
-                    if (isValidDate(user.date_of_birth)) {
-                        if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
-                            matches.push(user);
-                        }
-                    }
-
-                }
-            }
-            return matches;
-        }
-
-        // Set someone's birthday
         robot.hear(set_regex, function (msg) {
             let date, name, user, users;
             name = msg.match[2];
@@ -169,7 +166,7 @@
         robot.hear(check_regex, function (msg) {
             let date, name, user, users;
             date = msg.match[2];
-            users = find_users_born_on_date(moment(date, DATE_FORMAT), robot.brain.data.users);
+            users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
             if (users.length > 0) {
                 let resp = `${date} день рождения у `;
                 for (idx = i = 0, len = users.length; i < len; idx = ++i) {
@@ -256,7 +253,7 @@
         if (BIRTHDAY_CRON_STRING) {
             schedule.scheduleJob(BIRTHDAY_CRON_STRING, function () {
                 let birthday_users, i, idx, len, msg, user;
-                birthday_users = find_users_born_on_date(moment(), robot.brain.data.users);
+                birthday_users = findUsersBornOnDate(moment(), robot.brain.data.users);
                 let birthday_announcement = function (image_url) {
                     general_birthday_announcement(robot, birthday_users, image_url);
                 };
@@ -280,7 +277,7 @@
                     bday_usr_id;
                 after_an_interval = moment();
                 after_an_interval.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
-                birthday_users = find_users_born_on_date(after_an_interval, robot.brain.data.users);
+                birthday_users = findUsersBornOnDate(after_an_interval, robot.brain.data.users);
                 for (bday_usr_id = 0; bday_usr_id < birthday_users.length; bday_usr_id++) {
                     birthday_user = birthday_users[bday_usr_id];
                     let users = robot.brain.data.users;
