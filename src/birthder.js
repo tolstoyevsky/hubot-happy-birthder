@@ -106,27 +106,22 @@
             (firstDate.date() === secondsDate.date());
     }
 
+    /**
+     * Check if date string is a valid date
+     * using strict format which are defined in `DATE_FORMAT` constant.
+     *
+     * @param {string} date
+     * @returns {boolean}
+     */
+    function isValidDate(date) {
+        return typeof date === "string" && moment(date, DATE_FORMAT, true).isValid();
+    }
+
     module.exports = function (robot) {
         let set_regex = /(birthday set) (?:@?([\w\d .\-_]+)\?*) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let check_regex = /(birthdays on) ((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/i;
         let delete_regex = /(birthday delete) (?:@?([\w\d .\-_]+)\?*)\b/i;
 
-        /**
-         * Check if date string is a valid date.
-         *
-         * @param {string} date
-         * @returns {boolean}
-         */
-        function is_valid_birthdate(date) {
-            if (date) {
-                if (date.length > 0) {
-                    if (moment(date, DATE_FORMAT).isValid) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
 
         /**
          * Find users who have the same value in their birthday field with date.
@@ -142,7 +137,7 @@
                 if (users.hasOwnProperty(uid)) {
 
                     user = users[uid];
-                    if (is_valid_birthdate(user.date_of_birth)) {
+                    if (isValidDate(user.date_of_birth)) {
                         if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
                             matches.push(user);
                         }
@@ -215,7 +210,7 @@
                 message = "";
                 for (k in users || {}) {
                     user = users[k];
-                    if (is_valid_birthdate(user.date_of_birth)) {
+                    if (isValidDate(user.date_of_birth)) {
                         message += `${user.name} родился ${user.date_of_birth}\n`;
                     }
                 }
