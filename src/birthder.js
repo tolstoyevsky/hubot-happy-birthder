@@ -165,7 +165,7 @@
      *
      * @param {Object} robot - Robot from root function's param.
      */
-    function sendAnnouncements(robot) {
+    function sendReminders(robot) {
         let targetDay = moment(), userNames, userNamesString,
             users, message;
         targetDay.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
@@ -265,7 +265,7 @@
 
         // Announce birthdays to each user (except one whose birthday it is) in advance
         if (ANNOUNCER_CRON_STRING) {
-            schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendAnnouncements(robot));
+            schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot));
         }
     }
 }).call(this);
