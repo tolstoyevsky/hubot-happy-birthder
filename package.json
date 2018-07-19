@@ -3,7 +3,7 @@
   "description": "Hubot script for writing birthday messages to users",
   "version": "0.0.1",
   "author": "6r1d",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "keywords": [
       "hubot",
       "hubot-scripts"
