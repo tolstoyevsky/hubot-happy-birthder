@@ -57,9 +57,9 @@
     ];
 
     /**
-     * Select random image URL from a list of images (returned by the search).
+     * Select a random image URL from a list of images (returned by the search).
      *
-     * @param {Object} response - Response object from node-fetch package.
+     * @param {Object} response - Response object from the node-fetch package.
      * @returns {string} image URL
      */
     function selectTenorImageUrl(response) {
@@ -69,8 +69,8 @@
     }
 
     /**
-     * Get image URL through Tenor API.
-     * It also uses TENOR_API_KEY, TENOR_SEARCH_TERM, TENOR_IMG_LIMIT as request params.
+     * Get an image URL through Tenor's GIF API.
+     * TENOR_API_KEY, TENOR_SEARCH_TERM and TENOR_IMG_LIMIT are used as request params.
      *
      * @returns {Promise<string|*>} image URL
      */
@@ -85,8 +85,8 @@
 
         let searchUrl = "https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}";
         // TODO process invalid inputs:
-        // check if response might be parsed as JSON,
-        // check if input dict contains required keys
+        // * check if response might be parsed as JSON,
+        // * check if input dict contains required keys
         response = await nFetch(searchUrl);
         imageUrl = selectTenorImageUrl(await response.json());
 
@@ -94,7 +94,7 @@
     }
 
     /**
-     * Check if two dates have the same month and day values.
+     * Check if two specified dates have the same month and day.
      *
      * @param {moment} firstDate
      * @param {moment} secondsDate
@@ -106,8 +106,7 @@
     }
 
     /**
-     * Check if date string is a valid date
-     * using strict format which are defined in `DATE_FORMAT` constant.
+     * Check if the specified date string follows the format stored in the DATE_FORMAT constant.
      *
      * @param {string} date
      * @returns {boolean}
@@ -117,10 +116,10 @@
     }
 
     /**
-     * Find users who have the same value in their birthday field with date.
+     * Find the users who have the same birthday.
      *
-     * @param {Date} date - Date which will be used for comparing.
-     * @param {Object} users - User object where each key is user instance.
+     * @param {Date} date - Date which will be used for the comparison.
+     * @param {Object} users - User object where each key is the user instance.
      * @returns {Array}
      */
     function findUsersBornOnDate(date, users) {
@@ -136,11 +135,11 @@
     }
 
     /**
-     * Birthday announce for users into GENERAL channel.
+     * Write a birthday message to the general channel.
      *
-     * @param {Object} robot - Robot from root function's param.
-     * @param {Array} users - User list.
-     * @param {string} imageUrl - Image url for posting into channel.
+     * @param {Object} robot - Robot from the param of the root function.
+     * @param {Array} users - Users list.
+     * @param {string} imageUrl - Image URL for posting in the channel.
      */
     function generalBirthdayAnnouncement(robot, users, imageUrl) {
         let messageText, userNames = users.map(user => `@${user.name}`);
@@ -151,7 +150,7 @@
     }
 
     /**
-     * Get random quote from the QUOTES array.
+     * Get a random quote from the QUOTES array.
      *
      * @returns {string}
      */
@@ -160,10 +159,9 @@
     }
 
     /**
-     * Sending announcements of users' birthdays.
-     * Notification will be sent for the all users, excluding users from announcements.
+     * Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
      *
-     * @param {Object} robot - Robot from root function's param.
+     * @param {Object} robot - Robot from the param of the root function.
      */
     function sendReminders(robot) {
         let targetDay = moment(), userNames, userNamesString,
@@ -183,8 +181,9 @@
     }
 
     /**
-     * Sending today's messages.
-     * These messages will be posted into the general channel.
+     * Write birthday messages to the general channel.
+     *
+     * @param {Object} robot - Robot from the param of the root function.
      */
     function sendCongratulations(robot) {
         let birthday_users = findUsersBornOnDate(moment(), robot.brain.data.users);
@@ -204,7 +203,7 @@
             list: new RegExp(/birthdays list/, 'i')
         };
 
-        // Set user's birthday
+        // Link together the specified birthday and user and store the link in the brain.
         robot.hear(routes.set, function (msg) {
             let date, name, user, users;
             name = msg.match[2];
@@ -221,7 +220,7 @@
             }
         });
 
-        // Check a birthday using a date
+        // Print the users names whose birthdays match the specified date.
         robot.hear(routes.check, function (msg) {
             let date = msg.match[2], users;
             users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
@@ -233,7 +232,7 @@
             return msg.send(message);
         });
 
-        // Delete someone's birthday
+        // Delete the birthday associated with the specified user name.
         robot.hear(routes.delete, function (msg) {
             let name = msg.match[2], user, users;
             users = robot.brain.usersForFuzzyName(name);
@@ -248,7 +247,7 @@
             }
         });
 
-        // Display users' birthdays
+        // Print users birthdays.
         robot.respond(routes.list, function (msg) {
             let message, messageItems;
             messageItems = Object.values(robot.brain.data.users)
@@ -258,12 +257,12 @@
             return msg.send(message);
         });
 
-        // Regularly checks for a birthday, announces to "generic" chat room
+        // Check regularly if today is someone's birthday, write birthday messages to the general channel.
         if (BIRTHDAY_CRON_STRING) {
             schedule.scheduleJob(BIRTHDAY_CRON_STRING, () => sendCongratulations(robot));
         }
 
-        // Announce birthdays to each user (except one whose birthday it is) in advance
+        // Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
         if (ANNOUNCER_CRON_STRING) {
             schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot));
         }
