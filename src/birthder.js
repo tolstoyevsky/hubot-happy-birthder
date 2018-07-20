@@ -11,9 +11,9 @@
 //
 // Commands:
 //   birthdays list - shows a list of users and their birthdays
-//   birthday set <username> <date>/<month>/<year> - sets a birthday for the user
-//   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date
-//   birthday delete <username> - deletes birthday for the user
+//   birthday set <username> <date>/<month>/<year> - sets a birthday for the user (privileged: admin, manager)
+//   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date (privileged: admin, manager)
+//   birthday delete <username> - deletes birthday for the user (privileged: admin, manager)
 //
 // Author:
 //   6r1d
@@ -23,6 +23,7 @@
     const nFetch = require('node-fetch');
 
     const TENOR_API_KEY = process.env.TENOR_API_KEY || false;
+    const ADMIN_USERS = (process.env.HUBOT_AUTH_ADMIN || '').split(',');
     const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || false;
     const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || false;
     const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || false;
@@ -31,8 +32,9 @@
     const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT || false;
     const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || false;
 
-    const MSG_UNABLE_TO_LOCATE_USERS = `Не могу найти пользователей с этим днём рождения.`;
-    const MSG_BIRTHDAY_IN_A_WEEK = `Скоро день рождения у`;
+    const MSG_PERMISSION_DENIED = "Permission denied.";
+    const MSG_UNABLE_TO_LOCATE_USERS = "Не могу найти пользователей с этим днём рождения.";
+    const MSG_BIRTHDAY_IN_A_WEEK = "Скоро день рождения у";
     const DATE_FORMAT = "DD/MM/YYYY";
 
     const QUOTES = [
@@ -57,6 +59,11 @@
         "We know we're getting old when the only thing we want for our birthday is not to be reminded of it.",
         "Happy Birthday on your very special day, I hope that you don't die before you eat your cake."
     ];
+
+    const ROLES = {
+        manager: 'manager',
+        admin: 'admin'
+    };
 
     /**
      * Select a random image URL from a list of images (returned by the search).
@@ -186,6 +193,17 @@
         }
     }
 
+
+    /** Check permissions for the specified user.
+     *
+     * @param {Object} user - Target user.
+     * @param {Array|undefined} roles - Array of the users roles.
+     * @returns {boolean}
+     */
+    function hasRoles(user, roles) {
+        return (ADMIN_USERS.indexOf(user.id.toString()) !== -1) || (!!user.roles && roles.filter(role => user.roles.indexOf(role) !==-1).length > 0);
+    }
+
     module.exports = function (robot) {
         const regExpUsername = new RegExp(/(?:@?([\w\d .\-_]+)\?*)/),
             regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/);
@@ -199,6 +217,10 @@
 
         // Link together the specified birthday and user and store the link in the brain.
         robot.hear(routes.set, function (msg) {
+            if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
+                msg.send(MSG_PERMISSION_DENIED);
+                return;
+            }
             let date, name, user, users;
             name = msg.match[2];
             date = msg.match[3];
@@ -216,6 +238,10 @@
 
         // Print the users names whose birthdays match the specified date.
         robot.hear(routes.check, function (msg) {
+            if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
+                msg.send(MSG_PERMISSION_DENIED);
+                return;
+            }
             let date = msg.match[2], users;
             users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
             if (users.length === 0) {
@@ -228,6 +254,10 @@
 
         // Delete the birthday associated with the specified user name.
         robot.hear(routes.delete, function (msg) {
+            if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
+                msg.send(MSG_PERMISSION_DENIED);
+                return;
+            }
             let name = msg.match[2], user, users;
             users = robot.brain.usersForFuzzyName(name);
             if (users.length === 1) {
