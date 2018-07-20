@@ -194,7 +194,7 @@
             set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
             delete: new RegExp(/(birthday delete)\s+/.source + regExpUsername.source + /\b/.source, 'i'),
             check: new RegExp(/(birthdays on)\s+/.source + regExpDate.source, 'i'),
-            list: new RegExp(/birthdays list/, 'i')
+            list: new RegExp(/birthdays list$/, 'i')
         };
 
         // Link together the specified birthday and user and store the link in the brain.
