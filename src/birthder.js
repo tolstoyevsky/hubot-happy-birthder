@@ -137,21 +137,6 @@
     }
 
     /**
-     * Write a birthday message to the general channel.
-     *
-     * @param {Object} robot - Robot from the param of the root function.
-     * @param {Array} users - Users list.
-     * @param {string} imageUrl - Image URL for posting in the channel.
-     */
-    function generalBirthdayAnnouncement(robot, users, imageUrl) {
-        let messageText, userNames = users.map(user => `@${user.name}`);
-        if (users.length > 0) {
-            messageText = `${imageUrl || ''}\nСегодня день рождения ${userNames.join(', ')}!\n${quote()}`;
-            robot.messageRoom("general", messageText);
-        }
-    }
-
-    /**
      * Get a random quote from the QUOTES array.
      *
      * @returns {string}
@@ -188,10 +173,17 @@
      * @param {Object} robot - Robot from the param of the root function.
      */
     function sendCongratulations(robot) {
-        let birthday_users = findUsersBornOnDate(moment(), robot.brain.data.users);
-        grabTenorImage()
-            .then(url => generalBirthdayAnnouncement(robot, birthday_users, url))
-            .catch(e => console.error(e));
+        let users = findUsersBornOnDate(moment(), robot.brain.data.users);
+        if (users.length > 0) {
+            grabTenorImage()
+                .then(function (imageUrl) {
+                    let messageText,
+                        userNames = users.map(user => `@${user.name}`);
+                    messageText = `${imageUrl || ''}\nСегодня день рождения ${userNames.join(', ')}!\n${quote()}`;
+                    robot.messageRoom("general", messageText);
+                })
+                .catch(e => console.error(e));
+        }
     }
 
     module.exports = function (robot) {
