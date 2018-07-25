@@ -92,7 +92,7 @@
         // TODO process output for the wrong key, invalid input and so on
         anonId = tenorResponse.anon_id;
 
-        let searchUrl = "https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}";
+        let searchUrl = `https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`;
         // TODO process invalid inputs:
         // * check if response might be parsed as JSON,
         // * check if input dict contains required keys
