@@ -34,6 +34,7 @@
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
     const DATE_FORMAT = "DD/MM/YYYY";
+    const SHORT_DATE_FORMAT = "DD/MM";
 
     const QUOTES = [
         "Hoping that your day will be as special as you are.",
@@ -162,7 +163,7 @@
         users = findUsersBornOnDate(targetDay, robot.brain.data.users);
         userNames = users.map(user => user.name);
         userNamesString = userNames.map(name => `@${name}`).join(', ');
-        message = `${userNamesString} is having a birthday on ${targetDay.format(DATE_FORMAT)}.`;
+        message = `${userNamesString} is having a birthday on ${targetDay.format(SHORT_DATE_FORMAT)}.`;
         if (users.length > 0) {
             for (let user of Object.values(robot.brain.data.users)) {
                 if (userNames.indexOf(user.name) === -1) {
