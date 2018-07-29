@@ -8,7 +8,7 @@ The script can be configured via the following environment variables (called par
 
 | Parameter                           | Description |
 |-------------------------------------|-------------|
-| `TENOR_API_KEY`                     | Сlient key for privileged API access. |
+| `TENOR_API_KEY`                     | Сlient key for privileged API access. This is the only **mandatory** parameter. |
 | `TENOR_IMG_LIMIT`                   | Fetches up to the specified number of result, but not more than **50**. By default the value of the variable and the corresponding API parameter is **20**. |
 | `TENOR_SEARCH_TERM`                 | Helps to find GIFs associated with the specified term. |
 | `ANNOUNCER_CRON_STRING`             | Allows specifying the frequency with which the script checks for nearest birthdays. The value of this parameter must follow the [Cron Format](http://nncron.ru/help/EN/working/cron-format.htm). |
