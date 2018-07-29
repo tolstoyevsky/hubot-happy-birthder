@@ -226,7 +226,7 @@
             if (users.length === 1) {
                 user = users[0];
                 user.date_of_birth = date;
-                return msg.send(`Saving ${name}'s birthday: ${user.date_of_birth}`);
+                return msg.send(`Saving ${name}'s birthday.`);
             } else if (users.length > 1) {
                 return msg.send(getAmbiguousUserText(users));
             } else {
@@ -261,7 +261,7 @@
             if (users.length === 1) {
                 user = users[0];
                 user.date_of_birth = null;
-                return msg.send(`Removing ${name}'s birthday`);
+                return msg.send(`Removing ${name}'s birthday.`);
             } else if (users.length > 1) {
                 return msg.send(getAmbiguousUserText(users));
             } else {
