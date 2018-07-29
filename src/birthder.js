@@ -33,8 +33,6 @@
     const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || false;
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
-    const MSG_UNABLE_TO_LOCATE_USERS = "Не могу найти пользователей с этим днём рождения.";
-    const MSG_BIRTHDAY_IN_A_WEEK = "Скоро день рождения у";
     const DATE_FORMAT = "DD/MM/YYYY";
 
     const QUOTES = [
@@ -164,7 +162,7 @@
         users = findUsersBornOnDate(targetDay, robot.brain.data.users);
         userNames = users.map(user => user.name);
         userNamesString = userNames.map(name => `@${name}`).join(', ');
-        message = `${MSG_BIRTHDAY_IN_A_WEEK} ${userNamesString}: ${targetDay.format(DATE_FORMAT)}.`;
+        message = `${userNamesString} is having a birthday on ${targetDay.format(DATE_FORMAT)}.`;
         if (users.length > 0) {
             for (let user of Object.values(robot.brain.data.users)) {
                 if (userNames.indexOf(user.name) === -1) {
@@ -186,7 +184,7 @@
                 .then(function (imageUrl) {
                     let messageText,
                         userNames = users.map(user => `@${user.name}`);
-                    messageText = `${imageUrl || ''}\nСегодня день рождения ${userNames.join(', ')}!\n${quote()}`;
+                    messageText = `${imageUrl || ''}\nToday is birthday of ${userNames.join(' and ')}!\n${quote()}`;
                     robot.messageRoom("general", messageText);
                 })
                 .catch(e => console.error(e));
@@ -228,11 +226,11 @@
             if (users.length === 1) {
                 user = users[0];
                 user.date_of_birth = date;
-                return msg.send(`Сохраняю день рождения ${name}: ${user.date_of_birth}`);
+                return msg.send(`Saving ${name}'s birthday: ${user.date_of_birth}`);
             } else if (users.length > 1) {
                 return msg.send(getAmbiguousUserText(users));
             } else {
-                return msg.send(`${name}? Кто это?`);
+                return msg.send(`I have never met ${name}.`);
             }
         });
 
@@ -245,10 +243,10 @@
             let date = msg.match[2], users;
             users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
             if (users.length === 0) {
-                return msg.send(MSG_UNABLE_TO_LOCATE_USERS);
+                return msg.send("Could not find any user with the specified birthday.");
             }
             let userNames = users.map(user => `@${user.name}`), message;
-            message = `*${date}* день рождения у ${userNames.join(', ')}\n${quote()}`;
+            message = `${userNames.join(', ')}`;
             return msg.send(message);
         });
 
@@ -263,11 +261,11 @@
             if (users.length === 1) {
                 user = users[0];
                 user.date_of_birth = null;
-                return msg.send(`Удаляю день рождения ${name}`);
+                return msg.send(`Removing ${name}'s birthday`);
             } else if (users.length > 1) {
                 return msg.send(getAmbiguousUserText(users));
             } else {
-                return msg.send(`${name}? Кто это?`);
+                return msg.send(`I have never met ${name}.`);
             }
         });
 
@@ -276,7 +274,7 @@
             let message, messageItems;
             messageItems = Object.values(robot.brain.data.users)
                 .filter(user => isValidDate(user.date_of_birth))
-                .map(user => `${user.name} родился ${user.date_of_birth}`);
+                .map(user => `${user.name} was born on ${user.date_of_birth}`);
             message = messageItems.length === 0 ? 'Oops... No results.' : messageItems.join('\n');
             return msg.send(message);
         });
