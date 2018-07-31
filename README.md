@@ -2,6 +2,10 @@
 
 Hubot script for writing birthday messages to users. It uses [Tenor](https://tenor.com) GIFs to make the messages more lively.
 
+## Prerequisites
+
+The script requires [hubot-auth](https://github.com/hubot-scripts/hubot-auth).
+
 ## Configuration
 
 The script can be configured via the following environment variables (called parameters).
