@@ -42,3 +42,7 @@ hubot >> homer was born on 12/05/1956
 hubot >> matt was born on 15/02/1954
 ```
 
+## Known issues
+
+When specifying a birth date for a particular user, the script may complain that it has never met the user before. In this case just ask the user to interact with the bot executing, for example, the `what roles do I have` command.
+
