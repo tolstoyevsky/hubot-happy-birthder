@@ -2,6 +2,12 @@
 
 Hubot script for writing birthday messages to users. It uses [Tenor](https://tenor.com) GIFs to make the messages more lively.
 
+## Features
+
+* Fetches a random GIF using the `simpsons-birthday` search query before writing a birthday message to a birthday boy/girl. The query (called "search term" in the Tenor terminology) is configurable.
+* Writes birthday messages to `#general`.
+* Reminds users of the upcoming birthdays. It's possible to specify how long before the event occurs the reminder should be triggered.
+
 ## Prerequisites
 
 The script requires [hubot-auth](https://github.com/hubot-scripts/hubot-auth).
