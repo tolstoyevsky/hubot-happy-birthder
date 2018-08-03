@@ -20,3 +20,15 @@ The script can be configured via the following environment variables (called par
 | `BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT`  | Sets how long before the event occurs the reminder will be triggered. |
 | `BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE` | Unit of time. The possible values are (the corresponding shorthands are specified in the brackets): `years` (`y`), `quarters` (`Q`), `months` (`M`), `weeks` (`w`), `days` (`d`), `hours` (`h`), `minutes` (`m`), `seconds` (`s`), `milliseconds` (`ms`). |
 
+## Example Interaction
+
+```
+some.user >> @hubot birthday set matt 15/02/1954
+hubot >> Saving matt's birthday.
+some.user >> @hubot birthday set homer 12/05/1956
+hubot >> Saving homer's birthday.
+some.user >> @hubot birthdays list
+hubot >> homer was born on 12/05/1956
+hubot >> matt was born on 15/02/1954
+```
+
