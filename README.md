@@ -8,7 +8,7 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 
 ## Features
 
-* Fetches a random GIF using the `simpsons-birthday` search query before writing a birthday message to a birthday boy/girl. The query (called "search term" in the Tenor terminology) is configurable.
+* Fetches a random GIF using the `thesimpsonsbirthday+simpsonsbirthday+futuramabirthday+rickandmortybirthday` search query before writing a birthday message to a birthday boy/girl. The query (called "search term" in the Tenor terminology) is configurable via the `TENOR_SEARCH_TERM`environment variable. See the set of images associated with the search term used by default [here](https://tenor.com/search/thesimpsonsbirthday-simpsonsbirthday-futuramabirthday-rickandmortybirthday-gifs).
 * Writes birthday messages to `#general`.
 * Reminds users of the upcoming birthdays. It's possible to specify how long before the event occurs the reminder should be triggered.
 
@@ -20,15 +20,15 @@ The script requires [hubot-auth](https://github.com/hubot-scripts/hubot-auth).
 
 The script can be configured via the following environment variables (called parameters).
 
-| Parameter                           | Description |
-|-------------------------------------|-------------|
-| `TENOR_API_KEY`                     | Сlient key for privileged API access. This is the only **mandatory** parameter. |
-| `TENOR_IMG_LIMIT`                   | Fetches up to the specified number of result, but not more than **50**. By default the value of the variable and the corresponding API parameter is **20**. |
-| `TENOR_SEARCH_TERM`                 | Helps to find GIFs associated with the specified term. |
-| `ANNOUNCER_CRON_STRING`             | Allows specifying the frequency with which the script checks for nearest birthdays. The value of this parameter must follow the [Cron Format](https://github.com/node-schedule/node-schedule#cron-style-scheduling). |
-| `BIRTHDAY_CRON_STRING`              | Allows specifying the frequency with which the script writes birthday messages to users. The value of this parameter must follow the [Cron Format](https://github.com/node-schedule/node-schedule#cron-style-scheduling). |
-| `BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT`  | Sets how long before the event occurs the reminder will be triggered. |
-| `BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE` | Unit of time. The possible values are (the corresponding shorthands are specified in the brackets): `years` (`y`), `quarters` (`Q`), `months` (`M`), `weeks` (`w`), `days` (`d`), `hours` (`h`), `minutes` (`m`), `seconds` (`s`), `milliseconds` (`ms`). |
+| Parameter                           | Description | Default |
+|-------------------------------------|-------------|---------|
+| `TENOR_API_KEY`                     | Сlient key for privileged API access. This is the only **mandatory** parameter. | |
+| `TENOR_IMG_LIMIT`                   | Fetches up to the specified number of result, but not more than **50**. | 50 |
+| `TENOR_SEARCH_TERM`                 | Helps to find GIFs associated with the specified term. | See [Features](#features) |
+| `ANNOUNCER_CRON_STRING`             | Allows specifying the frequency with which the script checks for nearest birthdays. The value of this parameter must follow the [Cron Format](https://github.com/node-schedule/node-schedule#cron-style-scheduling). | `0 0 7 * * *` |
+| `BIRTHDAY_CRON_STRING`              | Allows specifying the frequency with which the script writes birthday messages to users. The value of this parameter must follow the [Cron Format](https://github.com/node-schedule/node-schedule#cron-style-scheduling). | `0 0 7 * * *` |
+| `BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT`  | Sets how long before the event occurs the reminder will be triggered. | 7 |
+| `BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE` | Unit of time. The possible values are (the corresponding shorthands are specified in the brackets): `years` (`y`), `quarters` (`Q`), `months` (`M`), `weeks` (`w`), `days` (`d`), `hours` (`h`), `minutes` (`m`), `seconds` (`s`), `milliseconds` (`ms`). | days |
 
 ## Example Interaction
 
