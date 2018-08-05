@@ -24,13 +24,13 @@
 
     const TENOR_API_KEY = process.env.TENOR_API_KEY || "";
     const ADMIN_USERS = (process.env.HUBOT_AUTH_ADMIN || '').split(',');
-    const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || false;
-    const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || false;
-    const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || false;
-    const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || false;
+    const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50;
+    const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || "thesimpsonsbirthday+simpsonsbirthday+futuramabirthday+rickandmortybirthday";
+    const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || "0 0 7 * * *";
+    const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || "0 0 7 * * *";
     // Time and measure of it to announce birthdays in advance. For example, 7 days.
-    const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT || false;
-    const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || false;
+    const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT || 7;
+    const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || "days";
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
     const DATE_FORMAT = "DD/MM/YYYY";
