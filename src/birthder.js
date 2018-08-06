@@ -83,19 +83,51 @@
      * @returns {Promise<string|*>} image URL
      */
     async function grabTenorImage() {
-        let imageUrl, anonId, response, tenorResponse;
-        let tenor_key_url = "https://api.tenor.com/v1/anonid?key=" + TENOR_API_KEY;
+        let imageUrl, response;
 
-        response = await nFetch(tenor_key_url);
-        tenorResponse = await response.json();
-        // TODO process output for the wrong key, invalid input and so on
-        anonId = tenorResponse.anon_id;
+        const tenorKeyUrl = `https://api.tenor.com/v1/anonid?key=${TENOR_API_KEY}`;
 
-        let searchUrl = `https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`;
-        // TODO process invalid inputs:
-        // * check if response might be parsed as JSON,
-        // * check if input dict contains required keys
-        response = await nFetch(searchUrl);
+        const delay = (ms) => {
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve()
+                }, ms)
+            })
+        }
+
+        const retryFetch = (url, retries=60, retryDelay=1000) => {
+            return new Promise((resolve, reject) => {
+                const wrapper = n => {
+                    nFetch(url)
+                        .then(res => { resolve(res) })
+                        .catch(async err => {
+                            if(n > 0) {
+                                console.log(`Retrying to request ${url}. ${n} attempts left.`)
+                                await delay(retryDelay)
+                                wrapper(--n)
+                            } else {
+                                reject(err)
+                            }
+                        })
+                    }
+
+                wrapper(retries)
+            })
+        }
+
+        const requestTenor = async () =>
+            await (await retryFetch(tenorKeyUrl)
+                .then(res => res.json())
+                .then(async (res) => {
+                    const anonId = res.anon_id;
+                    const searchUrl = `https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`;
+
+                    response = await retryFetch(searchUrl);
+
+                    return response;
+                }));
+
+        response = await requestTenor();
         imageUrl = selectTenorImageUrl(await response.json());
 
         return imageUrl;
