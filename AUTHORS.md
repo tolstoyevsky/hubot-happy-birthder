@@ -1,6 +1,6 @@
 # Authors
 
-The first version of the script was prepared by [Victor Gridnevsky](https://github.com/6r1d). A little later, [Eugene Hatsko](https://github.com/HackoDev) brought it to its working condition. Currently the the script is maintained by [Evgeny Golyshev](https://github.com/eugulixes).
+The first version of the script was prepared by [Victor Gridnevsky](https://github.com/6r1d). A little later, [Eugene Hatsko](https://github.com/HackoDev) brought it to its working condition. Currently the script is maintained by [Evgeny Golyshev](https://github.com/eugulixes).
 
 ## Acknowledgements
 
