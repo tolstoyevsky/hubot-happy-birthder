@@ -3,7 +3,7 @@
 Hubot script for writing birthday messages to users. It uses [Tenor](https://tenor.com) GIFs to make the messages more lively.
 
 <p align="center">
-    <img src="example.png">
+    <img src="example.png" width="600">
 </p>
 
 ## Features
