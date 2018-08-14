@@ -33,7 +33,7 @@
     const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || false;
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
-    const DATE_FORMAT = "DD/MM/YYYY";
+    const DATE_FORMATS = ["DD.MM.YYYY", "D.M.YYYY", "DD/MM/YYYY", "D/M/YYYY", ];
     const SHORT_DATE_FORMAT = "DD/MM";
 
     const QUOTES = [
@@ -146,13 +146,13 @@
     }
 
     /**
-     * Check if the specified date string follows the format stored in the DATE_FORMAT constant.
+     * Check if the specified date string follows the format stored in the DATE_FORMATS constant.
      *
      * @param {string} date
      * @returns {boolean}
      */
     function isValidDate(date) {
-        return typeof date === "string" && moment(date, DATE_FORMAT, true).isValid();
+        return typeof date === "string" && moment(date, DATE_FORMATS, true).isValid();
     }
 
     /**
@@ -166,7 +166,7 @@
         let matches = [];
         for (let user of Object.values(users)) {
             if (isValidDate(user.date_of_birth)) {
-                if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
+                if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMATS))) {
                     matches.push(user);
                 }
             }
@@ -237,7 +237,7 @@
 
     module.exports = function (robot) {
         const regExpUsername = new RegExp(/(?:@?([\w\d .\-_]+)\?*)/),
-            regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/);
+            regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])[\/.](0?[1-9]|1[0-2])[\/.]([\d]{4}))\b/);
 
         const routes = {
             set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
@@ -274,7 +274,7 @@
                 return;
             }
             let date = msg.match[2], users;
-            users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
+            users = findUsersBornOnDate(moment(date, DATE_FORMATS), robot.brain.data.users);
             if (users.length === 0) {
                 return msg.send("Could not find any user with the specified birthday.");
             }
