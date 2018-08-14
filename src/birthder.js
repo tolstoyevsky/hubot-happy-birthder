@@ -22,7 +22,7 @@
     const moment = require('moment');
     const nFetch = require('node-fetch');
 
-    const TENOR_API_KEY = process.env.TENOR_API_KEY || false;
+    const TENOR_API_KEY = process.env.TENOR_API_KEY || "";
     const ADMIN_USERS = (process.env.HUBOT_AUTH_ADMIN || '').split(',');
     const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || false;
     const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || false;
@@ -245,6 +245,11 @@
             check: new RegExp(/(birthdays on)\s+/.source + regExpDate.source, 'i'),
             list: new RegExp(/birthdays list$/, 'i')
         };
+
+        if (TENOR_API_KEY === "") {
+            robot.logger.error("TENOR_API_KEY is a mandatory parameter, however it's not specified.");
+            return;
+        }
 
         // Link together the specified birthday and user and store the link in the brain.
         robot.hear(routes.set, function (msg) {
