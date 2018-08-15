@@ -186,7 +186,7 @@
     /**
      * Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
      *
-     * @param {Object} robot - Robot from the param of the root function.
+     * @param {Object} robot - Hubot instance.
      */
     function sendReminders(robot) {
         let targetDay = moment(), userNames, userNamesString,
@@ -208,7 +208,7 @@
     /**
      * Write birthday messages to the general channel.
      *
-     * @param {Object} robot - Robot from the param of the root function.
+     * @param {Object} robot - Hubot instance.
      */
     function sendCongratulations(robot) {
         let users = findUsersBornOnDate(moment(), robot.brain.data.users);
