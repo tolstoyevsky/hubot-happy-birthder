@@ -71,9 +71,9 @@
      * @returns {string} image URL
      */
     function selectTenorImageUrl(response) {
-        let animals = response.results;
-        let randomAnimals = animals[Math.floor(Math.random() * animals.length)];
-        return randomAnimals.media[0].gif.url;
+        let items = response.results;
+        let randomItems = items[Math.floor(Math.random() * items.length)];
+        return randomItems.media[0].gif.url;
     }
 
     /**
