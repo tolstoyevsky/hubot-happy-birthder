@@ -10,8 +10,7 @@
 //   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date (privileged: admin, manager)
 //   birthday delete <username> - deletes birthday for the user (privileged: admin, manager)
 //
-// Author:
-//   6r1d
+
 (function () {
     const schedule = require('node-schedule');
     const moment = require('moment');
