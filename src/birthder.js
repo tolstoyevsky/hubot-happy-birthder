@@ -73,6 +73,7 @@
     function selectTenorImageUrl(response) {
         let items = response.results;
         let randomItems = items[Math.floor(Math.random() * items.length)];
+
         return randomItems.media[0].gif.url;
     }
 
@@ -164,6 +165,7 @@
      */
     function findUsersBornOnDate(date, users) {
         let matches = [];
+
         for (let user of Object.values(users)) {
             if (isValidDate(user.date_of_birth)) {
                 if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
@@ -171,6 +173,7 @@
                 }
             }
         }
+
         return matches;
     }
 
@@ -191,11 +194,13 @@
     function sendReminders(robot) {
         let targetDay = moment(), userNames, userNamesString,
             users, message;
+
         targetDay.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
         users = findUsersBornOnDate(targetDay, robot.brain.data.users);
         userNames = users.map(user => user.name);
         userNamesString = userNames.map(name => `@${name}`).join(', ');
         message = `${userNamesString} is having a birthday on ${targetDay.format(SHORT_DATE_FORMAT)}.`;
+
         if (users.length > 0) {
             for (let user of Object.values(robot.brain.data.users)) {
                 if (userNames.indexOf(user.name) === -1) {
@@ -212,11 +217,13 @@
      */
     function sendCongratulations(robot) {
         let users = findUsersBornOnDate(moment(), robot.brain.data.users);
+
         if (users.length > 0) {
             grabTenorImage()
                 .then(function (imageUrl) {
                     let messageText,
                         userNames = users.map(user => `@${user.name}`);
+
                     messageText = `${imageUrl || ''}\nToday is birthday of ${userNames.join(' and ')}!\n${quote()}`;
                     robot.messageRoom("general", messageText);
                 })
@@ -257,13 +264,17 @@
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
+
             let date, name, user, users;
+
             name = msg.match[2];
             date = msg.match[3];
             users = robot.brain.usersForFuzzyName(name);
+
             if (users.length === 1) {
                 user = users[0];
                 user.date_of_birth = date;
+
                 return msg.send(`Saving ${name}'s birthday.`);
             } else if (users.length > 1) {
                 return msg.send(getAmbiguousUserText(users));
@@ -278,13 +289,18 @@
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
+
             let date = msg.match[2], users;
+
             users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
+
             if (users.length === 0) {
                 return msg.send("Could not find any user with the specified birthday.");
             }
+
             let userNames = users.map(user => `@${user.name}`), message;
             message = `${userNames.join(', ')}`;
+
             return msg.send(message);
         });
 
@@ -294,11 +310,15 @@
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
+
             let name = msg.match[2], user, users;
+
             users = robot.brain.usersForFuzzyName(name);
+
             if (users.length === 1) {
                 user = users[0];
                 user.date_of_birth = null;
+
                 return msg.send(`Removing ${name}'s birthday.`);
             } else if (users.length > 1) {
                 return msg.send(getAmbiguousUserText(users));
@@ -310,10 +330,13 @@
         // Print users birthdays.
         robot.respond(routes.list, function (msg) {
             let message, messageItems;
+
             messageItems = Object.values(robot.brain.data.users)
                 .filter(user => isValidDate(user.date_of_birth))
                 .map(user => `${user.name} was born on ${user.date_of_birth}`);
+
             message = messageItems.length === 0 ? 'Oops... No results.' : messageItems.join('\n');
+
             return msg.send(message);
         });
 
