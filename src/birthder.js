@@ -258,12 +258,12 @@
 
         // Link together the specified birthday and user and store the link in the brain.
         robot.hear(routes.set, function (msg) {
+            let date, name, user, users;
+
             if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
-
-            let date, name, user, users;
 
             name = msg.match[2];
             date = msg.match[3];
@@ -283,20 +283,21 @@
 
         // Print the users names whose birthdays match the specified date.
         robot.hear(routes.check, function (msg) {
+            let date, users, userNames, message;
+
             if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
 
-            let date = msg.match[2], users;
-
+            date = msg.match[2];
             users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
 
             if (users.length === 0) {
                 return msg.send("Could not find any user with the specified birthday.");
             }
 
-            let userNames = users.map(user => `@${user.name}`), message;
+            userNames = users.map(user => `@${user.name}`);
             message = `${userNames.join(', ')}`;
 
             return msg.send(message);
@@ -304,12 +305,12 @@
 
         // Delete the birthday associated with the specified user name.
         robot.hear(routes.delete, function (msg) {
+            let name = msg.match[2], user, users;
+
             if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
-
-            let name = msg.match[2], user, users;
 
             users = robot.brain.usersForFuzzyName(name);
 
