@@ -220,7 +220,7 @@
                     messageText = `${imageUrl || ''}\nToday is birthday of ${userNames.join(' and ')}!\n${quote()}`;
                     robot.messageRoom("general", messageText);
                 })
-                .catch(e => console.error(e));
+                .catch(e => robot.logger.error(e));
         }
     }
 
