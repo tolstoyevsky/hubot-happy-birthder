@@ -1,11 +1,6 @@
 // Description:
 //   Birthday bot.
 //
-// Dependencies:
-//   "moment": "^2.22.2",
-//   "node-fetch": "^2.1.2"
-//   "node-schedule": "^0.6.0",
-//
 // Configuration:
 //   None
 //
