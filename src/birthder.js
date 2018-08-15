@@ -142,8 +142,7 @@
      * @returns {boolean}
      */
     function isEqualMonthDay(firstDate, secondsDate) {
-        return (firstDate.month() === secondsDate.month()) &&
-            (firstDate.date() === secondsDate.date());
+        return (firstDate.month() === secondsDate.month()) && (firstDate.date() === secondsDate.date());
     }
 
     /**
@@ -192,8 +191,7 @@
      * @param {Object} robot - Hubot instance.
      */
     function sendReminders(robot) {
-        let targetDay = moment(), userNames, userNamesString,
-            users, message;
+        let targetDay = moment(), userNames, userNamesString, users, message;
 
         targetDay.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
         users = findUsersBornOnDate(targetDay, robot.brain.data.users);
