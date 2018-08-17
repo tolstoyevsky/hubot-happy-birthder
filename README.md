@@ -16,6 +16,20 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 
 The script requires [hubot-auth](https://github.com/hubot-scripts/hubot-auth).
 
+## Installation
+
+In hubot project repo, run:
+
+`npm install git+https://github.com/tolstoyevsky/hubot-happy-birthder --save`
+
+Then add **hubot-happy-birthder** to your `external-scripts.json`:
+
+```json
+[
+  "hubot-happy-birthder"
+]
+```
+
 ## Configuration
 
 The script can be configured via the following environment variables (called parameters).
