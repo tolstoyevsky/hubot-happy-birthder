@@ -27,7 +27,13 @@
     const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || "days";
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
-    const DATE_FORMAT = "DD/MM/YYYY";
+
+    // This INPUT format string fits cases - "DD/MM/YYYY", "D/M/YYYY"; 
+    // See https://momentjs.com/docs/#/parsing/string-format/ for details
+    const DATE_FORMAT = "D/M/YYYY"; 
+
+    // This is OUTPUT format string, it follows other rules;
+    // See https://momentjs.com/docs/#/displaying/ for details.
     const SHORT_DATE_FORMAT = "DD/MM";
 
     const QUOTES = [
