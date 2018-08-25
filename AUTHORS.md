@@ -4,7 +4,7 @@ The first version of the script was prepared by [Victor Gridnevsky](https://gith
 
 ## Acknowledgements
 
-We thank all the contributors to the project. Here are the full list of the people who has contributed to hubot-happy-birthder:
+We thank all the contributors to the project. Here are the full list of the people who have contributed to hubot-happy-birthder:
 * [Mikhail Sibiryov](https://github.com/ukhryab)
 * [Sergei Bogolepov](https://github.com/Sergei-vb)
 
