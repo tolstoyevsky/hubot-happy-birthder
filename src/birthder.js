@@ -6,9 +6,9 @@
 //
 // Commands:
 //   birthdays list - shows a list of users and their birthdays
-//   birthday set <username> <date>/<month>/<year> - sets a birthday for the user (privileged: admin, manager)
-//   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date (privileged: admin, manager)
-//   birthday delete <username> - deletes birthday for the user (privileged: admin, manager)
+//   birthday set <username> <date>/<month>/<year> - sets a birthday for the user (privileged: admins only)
+//   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date (privileged: admins only)
+//   birthday delete <username> - deletes birthday for the user (privileged: admins only)
 //
 
 (function () {
@@ -17,7 +17,6 @@
     const nFetch = require('node-fetch');
 
     const TENOR_API_KEY = process.env.TENOR_API_KEY || "";
-    const ADMIN_USERS = (process.env.HUBOT_AUTH_ADMIN || '').split(',');
     const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50;
     const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || "thesimpsonsbirthday+simpsonsbirthday+futuramabirthday+rickandmortybirthday";
     const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || "0 0 7 * * *";
@@ -59,10 +58,29 @@
         "Happy Birthday on your very special day, I hope that you don't die before you eat your cake."
     ];
 
-    const ROLES = {
-        manager: 'manager',
-        admin: 'admin'
-    };
+    /**
+     * Use API to check if the specified user is admin.
+     * @param {Robot} robot        Hubot instance
+     * @param {string} username    Username
+     * @return {boolean|undefined} If user is admin
+     */
+    async function isAdmin(robot, username) {
+        try {
+            const info = await robot.adapter.api.get('users.info', { username: username })
+
+            if (!info.user) {
+                throw new Error('No user data returned');
+            }
+
+            if (!info.user.roles) {
+                throw new Error('User data did not include roles');
+            }
+
+            return info.user.roles.indexOf('admin') !== -1;
+        } catch (err) {
+            robot.logger.error('Could not get user data with bot, ensure it has `view-full-other-user-info` permission', err);
+        }
+    }
 
     /**
      * Select a random image URL from a list of images (returned by the search).
@@ -229,17 +247,6 @@
         }
     }
 
-
-    /** Check permissions for the specified user.
-     *
-     * @param {Object} user - Target user.
-     * @param {Array|undefined} roles - Array of the users roles.
-     * @returns {boolean}
-     */
-    function hasRoles(user, roles) {
-        return (ADMIN_USERS.indexOf(user.id.toString()) !== -1) || (!!user.roles && roles.filter(role => user.roles.indexOf(role) !==-1).length > 0);
-    }
-
     module.exports = function (robot) {
         const regExpUsername = new RegExp(/(?:@?([\w\d .\-_]+)\?*)/),
             regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/);
@@ -257,10 +264,10 @@
         }
 
         // Link together the specified birthday and user and store the link in the brain.
-        robot.hear(routes.set, function (msg) {
+        robot.hear(routes.set, async (msg) => {
             let date, name, user, users;
 
-            if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
+            if (!await isAdmin(robot, msg.message.user.name.toString())) {
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
@@ -282,10 +289,10 @@
         });
 
         // Print the users names whose birthdays match the specified date.
-        robot.hear(routes.check, function (msg) {
+        robot.hear(routes.check, async (msg) => {
             let date, users, userNames, message;
 
-            if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
+            if (!await isAdmin(robot, msg.message.user.name.toString())) {
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
@@ -304,10 +311,10 @@
         });
 
         // Delete the birthday associated with the specified user name.
-        robot.hear(routes.delete, function (msg) {
+        robot.hear(routes.delete, async (msg) => {
             let name = msg.match[2], user, users;
 
-            if (!hasRoles(msg.message.user, [ROLES.admin, ROLES.manager])) {
+            if (!await isAdmin(robot, msg.message.user.name.toString())) {
                 msg.send(MSG_PERMISSION_DENIED);
                 return;
             }
