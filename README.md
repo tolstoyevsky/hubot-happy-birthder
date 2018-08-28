@@ -14,7 +14,7 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 
 ## Prerequisites
 
-The script requires [hubot-auth](https://github.com/hubot-scripts/hubot-auth).
+The bot has to have `view-full-other-user-info` permission.
 
 ## Installation
 
@@ -58,7 +58,7 @@ hubot >> matt was born on 15/02/1954
 
 ## Known issues
 
-When specifying a birth date for a particular user, the script may complain that it has never met the user before. In this case just ask the user to interact with the bot executing, for example, the `what roles do I have` command.
+When specifying a birth date for a particular user, the script may complain that it has never met the user before. In this case just ask the user to interact with the bot.
 
 ## Authors
 
