@@ -64,6 +64,8 @@
         admin: 'admin'
     };
 
+    const getAmbiguousUserText = users => `Be more specific, I know ${users.length} people named like that: ${(Array.from(users).map((user) => user.name)).join(", ")}`;
+
     /**
      * Select a random image URL from a list of images (returned by the search).
      *
