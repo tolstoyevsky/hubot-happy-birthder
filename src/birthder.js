@@ -209,13 +209,14 @@
      * @param {Object} robot - Hubot instance.
      */
     function sendReminders(robot) {
-        let targetDay = moment(), userNames, userNamesString, users, message;
+        let targetDay = moment(), userNames, userNamesString, users, message, toBe;
 
         targetDay.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
         users = findUsersBornOnDate(targetDay, robot.brain.data.users);
         userNames = users.map(user => user.name);
         userNamesString = userNames.map(name => `@${name}`).join(', ');
-        message = `${userNamesString} is having a birthday on ${targetDay.format(SHORT_DATE_FORMAT)}.`;
+        toBe = users.length > 1 ? 'are' : 'is';
+        message = `${userNamesString} ${toBe} having a birthday on ${targetDay.format(SHORT_DATE_FORMAT)}.`;
 
         if (users.length > 0) {
             for (let user of Object.values(robot.brain.data.users)) {
