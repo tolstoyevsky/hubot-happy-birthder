@@ -6,8 +6,8 @@
 //
 // Commands:
 //   birthdays list - shows a list of users and their birthdays
-//   birthday set <username> <date>/<month>/<year> - sets a birthday for the user (privileged: admins only)
-//   birthdays on <date>/<month>/<year> - shows a list of users with a set birthday date (privileged: admins only)
+//   birthday set <username> <date>.<month>.<year> - sets a birthday for the user (privileged: admins only)
+//   birthdays on <date>.<month>.<year> - shows a list of users with a set birthday date (privileged: admins only)
 //   birthday delete <username> - deletes birthday for the user (privileged: admins only)
 //
 
@@ -27,13 +27,13 @@
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
 
-    // This INPUT format string fits cases - "DD/MM/YYYY", "D/M/YYYY"; 
+    // This INPUT format string fits cases - "DD.MM.YYYY", "D.M.YYYY"; 
     // See https://momentjs.com/docs/#/parsing/string-format/ for details
-    const DATE_FORMAT = "D/M/YYYY"; 
+    const DATE_FORMAT = "D.M.YYYY"; 
 
     // This is OUTPUT format string, it follows other rules;
     // See https://momentjs.com/docs/#/displaying/ for details.
-    const SHORT_DATE_FORMAT = "DD/MM";
+    const SHORT_DATE_FORMAT = "DD.MM";
 
     const QUOTES = [
         "Hoping that your day will be as special as you are.",
@@ -249,7 +249,7 @@
 
     module.exports = function (robot) {
         const regExpUsername = new RegExp(/(?:@?([\w\d .\-_]+)\?*)/),
-            regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\/(0?[1-9]|1[0-2])\/([\d]{4}))\b/);
+            regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/);
 
         const routes = {
             set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
