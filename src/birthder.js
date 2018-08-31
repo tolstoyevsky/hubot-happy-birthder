@@ -325,6 +325,10 @@
 
             if (users.length === 1) {
                 user = users[0];
+                if (!user.date_of_birth) {
+                    return msg.send('A birth date is not specified for the user.');
+                }
+
                 user.date_of_birth = null;
 
                 return msg.send(`Removing ${name}'s birthday.`);
