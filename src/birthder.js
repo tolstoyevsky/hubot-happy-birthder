@@ -7,7 +7,7 @@
 // Commands:
 //   birthdays list - shows a list of users and their birthdays
 //   birthday set <username> <date>.<month>.<year> - sets a birthday for the user (privileged: admins only)
-//   birthdays on <date>.<month>.<year> - shows a list of users with a set birthday date (privileged: admins only)
+//   birthdays on <date>.<month> - shows a list of users with a set birthday date (privileged: admins only)
 //   birthday delete <username> - deletes birthday for the user (privileged: admins only)
 //
 
@@ -27,13 +27,16 @@
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
 
-    // This INPUT format string fits cases - "DD.MM.YYYY", "D.M.YYYY"; 
-    // See https://momentjs.com/docs/#/parsing/string-format/ for details
+    // Here are the INPUT format strings which are suitable for the following cases:
+    // * "DD.MM.YYYY", "D.M.YYYY"
+    // * "DD.MM", "D.M"
+    // See https://momentjs.com/docs/#/parsing/string-format/ for details.
     const DATE_FORMAT = "D.M.YYYY"; 
+    const SHORT_DATE_FORMAT = "D.M";
 
     // This is OUTPUT format string, it follows other rules;
     // See https://momentjs.com/docs/#/displaying/ for details.
-    const SHORT_DATE_FORMAT = "DD.MM";
+    const OUTPUT_SHORT_DATE_FORMAT = "DD.MM";
 
     const QUOTES = [
         "Hoping that your day will be as special as you are.",
@@ -216,7 +219,7 @@
         userNames = users.map(user => user.name);
         userNamesString = userNames.map(name => `@${name}`).join(', ');
         toBe = users.length > 1 ? 'are' : 'is';
-        when = amountOfTime > 1 ? `on ${targetDay.format(SHORT_DATE_FORMAT)}` : 'tomorrow';
+        when = amountOfTime > 1 ? `on ${targetDay.format(OUTPUT_SHORT_DATE_FORMAT)}` : 'tomorrow';
         message = `${userNamesString} ${toBe} having a birthday ${when}.`;
 
         if (users.length > 0) {
@@ -251,12 +254,13 @@
 
     module.exports = function (robot) {
         const regExpUsername = new RegExp(/(?:@?([\w\d .\-_]+)\?*)/),
-            regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/);
+            regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/),
+              regExpShortDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2]))\b/);
 
         const routes = {
             set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
             delete: new RegExp(/(birthday delete)\s+/.source + regExpUsername.source + /\b/.source, 'i'),
-            check: new RegExp(/(birthdays on)\s+/.source + regExpDate.source, 'i'),
+            check: new RegExp(/(birthdays on)\s+/.source + regExpShortDate.source, 'i'),
             list: new RegExp(/birthdays list$/, 'i')
         };
 
@@ -300,7 +304,7 @@
             }
 
             date = msg.match[2];
-            users = findUsersBornOnDate(moment(date, DATE_FORMAT), robot.brain.data.users);
+            users = findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users);
 
             if (users.length === 0) {
                 return msg.send("Could not find any user with the specified birthday.");
