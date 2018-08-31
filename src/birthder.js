@@ -22,7 +22,7 @@
     const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || "0 0 7 * * *";
     const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || "0 0 7 * * *";
     // Time and measure of it to announce birthdays in advance. For example, 7 days.
-    const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT || 7;
+    const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7;
     const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || "days";
 
     const MSG_PERMISSION_DENIED = "Permission denied.";
@@ -208,15 +208,16 @@
      *
      * @param {Object} robot - Hubot instance.
      */
-    function sendReminders(robot) {
-        let targetDay = moment(), userNames, userNamesString, users, message, toBe;
+    function sendReminders(robot, amountOfTime, unitOfTime) {
+        let targetDay = moment(), userNames, userNamesString, users, message, toBe, when;
 
-        targetDay.add(parseInt(BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10), BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE);
+        targetDay.add(amountOfTime, unitOfTime);
         users = findUsersBornOnDate(targetDay, robot.brain.data.users);
         userNames = users.map(user => user.name);
         userNamesString = userNames.map(name => `@${name}`).join(', ');
         toBe = users.length > 1 ? 'are' : 'is';
-        message = `${userNamesString} ${toBe} having a birthday on ${targetDay.format(SHORT_DATE_FORMAT)}.`;
+        when = amountOfTime > 1 ? `on ${targetDay.format(SHORT_DATE_FORMAT)}` : 'tomorrow';
+        message = `${userNamesString} ${toBe} having a birthday ${when}.`;
 
         if (users.length > 0) {
             for (let user of Object.values(robot.brain.data.users)) {
@@ -353,8 +354,13 @@
         }
 
         // Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
+
         if (ANNOUNCER_CRON_STRING) {
-            schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot));
+            schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot, BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE));
+        }
+
+        if (ANNOUNCER_CRON_STRING) {
+            schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot, 1, 'day'));
         }
     }
 }).call(this);
