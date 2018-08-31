@@ -7,7 +7,7 @@
 // Commands:
 //   birthdays list - shows a list of users and their birthdays
 //   birthday set <username> <date>.<month>.<year> - sets a birthday for the user (privileged: admins only)
-//   birthdays on <date>.<month> - shows a list of users with a set birthday date (privileged: admins only)
+//   birthdays on <date>.<month> - shows a list of users with a set birthday date
 //   birthday delete <username> - deletes birthday for the user (privileged: admins only)
 //
 
@@ -297,11 +297,6 @@
         // Print the users names whose birthdays match the specified date.
         robot.hear(routes.check, async (msg) => {
             let date, users, userNames, message;
-
-            if (!await isAdmin(robot, msg.message.user.name.toString())) {
-                msg.send(MSG_PERMISSION_DENIED);
-                return;
-            }
 
             date = msg.match[2];
             users = findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users);
