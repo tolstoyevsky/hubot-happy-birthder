@@ -255,7 +255,7 @@
     }
 
     module.exports = function (robot) {
-        const regExpUsername = new RegExp(/(?:@?([\w\d .\-_]+)\?*)/),
+        const regExpUsername = new RegExp(/(?:@?(.+))/),
             regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/),
               regExpShortDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2]))\b/);
 
@@ -280,7 +280,7 @@
                 return;
             }
 
-            name = msg.match[2];
+            name = msg.match[2].trim();
             date = msg.match[3];
             users = robot.brain.usersForFuzzyName(name);
 
@@ -315,7 +315,7 @@
 
         // Delete the birthday associated with the specified user name.
         robot.hear(routes.delete, async (msg) => {
-            let name = msg.match[2], user, users;
+            let name = msg.match[2].trim(), user, users;
 
             if (!await isAdmin(robot, msg.message.user.name.toString())) {
                 msg.send(MSG_PERMISSION_DENIED);
