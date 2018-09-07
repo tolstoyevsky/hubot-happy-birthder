@@ -209,24 +209,44 @@
     }
 
     /**
+     * Form a reminder message
+     *
+     * @param {Object} users - User object where each key is the user instance.
+     * @param {moment} targetDay - Date today
+     * @param {number} amountOfTime - Amount of time before birthday 
+     * @returns {string}
+     */
+     function formReminderMessage (users, targetDay, amountOfTime) {
+        const usernames = users.map(user => user.name);
+        const commaSeparatedUsernames = usernames.map(name => `@${name}`).join(', ');
+        const toBe = users.length > 1 ? 'are' : 'is';
+        const when = amountOfTime > 1 ? `on ${targetDay.format(OUTPUT_SHORT_DATE_FORMAT)}` : 'tomorrow';
+        const message = `${commaSeparatedUsernames} ${toBe} having a birthday ${when}.`;
+
+        return message
+     }
+
+    /**
      * Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
      *
      * @param {Object} robot - Hubot instance.
      */
     function sendReminders(robot, amountOfTime, unitOfTime) {
-        let targetDay = moment(), userNames, userNamesString, users, message, toBe, when;
+        let targetDay = moment(), userNames, users, message; 
 
         targetDay.add(amountOfTime, unitOfTime);
         users = findUsersBornOnDate(targetDay, robot.brain.data.users);
         userNames = users.map(user => user.name);
-        userNamesString = userNames.map(name => `@${name}`).join(', ');
-        toBe = users.length > 1 ? 'are' : 'is';
-        when = amountOfTime > 1 ? `on ${targetDay.format(OUTPUT_SHORT_DATE_FORMAT)}` : 'tomorrow';
-        message = `${userNamesString} ${toBe} having a birthday ${when}.`;
+        message = formReminderMessage(users, targetDay, amountOfTime);
 
         if (users.length > 0) {
             for (let user of Object.values(robot.brain.data.users)) {
                 if (userNames.indexOf(user.name) === -1) {
+                    robot.adapter.sendDirect({user: {name: user.name}}, message);
+                } else if (users.length > 1) {
+                    const usersCopy = users.splice(0)
+                    usersCopy.splice(usersCopy.indexOf(user), 1);
+                    message = formReminderMessage(usersCopy, targetDay, amountOfTime);
                     robot.adapter.sendDirect({user: {name: user.name}}, message);
                 }
             }
