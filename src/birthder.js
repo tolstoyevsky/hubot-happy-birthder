@@ -292,7 +292,7 @@
         }
 
         // Link together the specified birthday and user and store the link in the brain.
-        robot.hear(routes.set, async (msg) => {
+        robot.respond(routes.set, async (msg) => {
             let date, name, user, users;
 
             if (!await isAdmin(robot, msg.message.user.name.toString())) {
@@ -317,7 +317,7 @@
         });
 
         // Print the users names whose birthdays match the specified date.
-        robot.hear(routes.check, async (msg) => {
+        robot.respond(routes.check, async (msg) => {
             let date, users, userNames, message;
 
             date = msg.match[2];
@@ -334,7 +334,7 @@
         });
 
         // Delete the birthday associated with the specified user name.
-        robot.hear(routes.delete, async (msg) => {
+        robot.respond(routes.delete, async (msg) => {
             let name = msg.match[2].trim(), user, users;
 
             if (!await isAdmin(robot, msg.message.user.name.toString())) {
