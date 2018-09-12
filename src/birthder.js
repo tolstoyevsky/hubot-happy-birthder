@@ -36,9 +36,10 @@
     const DATE_FORMAT = "D.M.YYYY"; 
     const SHORT_DATE_FORMAT = "D.M";
 
-    // This is OUTPUT format string, it follows other rules;
+    // Here are the OUTPUT format strings, they follow other rules;
     // See https://momentjs.com/docs/#/displaying/ for details.
     const OUTPUT_SHORT_DATE_FORMAT = "DD.MM";
+    const OUTPUT_DATE_FORMAT = "DD.MM.YYYY"
 
     const QUOTES_PATH = path.join(__dirname, '/quotes.txt');
     const QUOTES = fs.readFileSync(QUOTES_PATH, 'utf8').toString().split("\n");
@@ -257,6 +258,74 @@
         }
     }
 
+   /**
+    *Compare subarrays by month, day and then merge them
+    *
+    *@param {array} left - Subarray
+    *@param {array} right - Subarray
+    *@returns {array} - Sorted array
+    */
+    function merge(left, right) {
+        var result  = [];
+        var indexLeft = 0;
+        var indexRight = 0;
+
+        while (indexLeft < left.length && indexRight < right.length){
+            var montLeft = parseInt(left[indexLeft][0][1]);
+            var monthRight = parseInt(right[indexRight][0][1]);
+            var dayLeft = parseInt(left[indexLeft][0][0]);
+            var dayRight = parseInt(right[indexRight][0][0]);
+
+            if (montLeft < monthRight){
+                result.push(left[indexLeft++]);
+            } else if (montLeft > monthRight) {
+                result.push(right[indexRight++]);
+            } else if (dayLeft < dayRight) {
+                result.push(left[indexLeft++]);
+            } else {
+                result.push(right[indexRight++]);
+            }
+        }
+
+        return result.concat(left.slice(indexLeft)).concat(right.slice(indexRight));
+    };
+
+    /**
+    *Split array to subarrays and handle merge sort
+    *
+    *@param {array} items - Array of arrays [[dayOfBirthday, monthOfBirthday], username]
+    *returns {array} - Sorted array
+    */
+    function mergeSort(items) {
+        if (items.length < 2) {
+            return items;
+        }
+
+        const middle = Math.floor(items.length / 2);
+        const left = items.slice(0, middle);
+        const right = items.slice(middle);
+
+        return merge(mergeSort(left), mergeSort(right));
+    };
+
+    /**
+    *Add element with date today, call merge sort and shift sorted array in order of date today
+    *
+    *@param {array} sortedUserArray - Sorted by month, day array of arrays [[dayOfBirthday, monthOfBirthday], username]
+    *@returns {array} - Started from date after today sortedUserArray
+    */
+    function sortedByToday(userArray) {
+        const dateToday = [moment().format("DD-MM").split('-')]
+        userArray.push(dateToday)
+
+        const result = mergeSort(userArray);
+        const index = result.indexOf(dateToday);
+        const sortedSearch = result.slice(index+1).concat(result.slice(0, index))
+
+        return sortedSearch
+
+    }
+
     module.exports = function (robot) {
         const regExpUsername = new RegExp(/(?:@?(.+))/),
             regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/),
@@ -343,15 +412,21 @@
             }
         });
 
-        // Print users birthdays.
+        // Print sorted users birthdays.
         robot.respond(routes.list, function (msg) {
-            let message, messageItems;
+            let message, sortedUserArray, userArray, sortedByTodayUserArray;
 
-            messageItems = Object.values(robot.brain.data.users)
+            userArray = Object.values(robot.brain.data.users)
                 .filter(user => isValidDate(user.dateOfBirth))
-                .map(user => `${user.name} was born on ${user.dateOfBirth}`);
+                .map(user => [user.dateOfBirth.split('.').slice(0, 3), user.name])
 
-            message = messageItems.length === 0 ? 'Oops... No results.' : messageItems.join('\n');
+            var result = sortedByToday(userArray);
+
+            if (result.length === 0) {
+                message = 'Oops... No results.';
+            } else {
+                message = result.map(item => `@${item[1]} was born on ${moment(item[0].join('.'), DATE_FORMAT).format(OUTPUT_DATE_FORMAT)}`);
+            }
 
             return msg.send(message);
         });
