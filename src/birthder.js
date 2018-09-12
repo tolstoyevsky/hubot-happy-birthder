@@ -5,10 +5,10 @@
 //   None
 //
 // Commands:
-//   birthdays list - shows a list of users and their birthdays
-//   birthday set <username> <date>.<month>.<year> - sets a birthday for the user (privileged: admins only)
-//   birthdays on <date>.<month> - shows a list of users with a set birthday date
-//   birthday delete <username> - deletes birthday for the user (privileged: admins only)
+//   hubot birthdays list - shows a list of users and their birthdays
+//   hubot birthday set <username> <date>.<month>.<year> - sets a birthday for the user (privileged: admins only)
+//   hubot birthdays on <date>.<month> - shows a list of users with a set birthday date
+//   hubot birthday delete <username> - deletes birthday for the user (privileged: admins only)
 //
 
 (function () {
