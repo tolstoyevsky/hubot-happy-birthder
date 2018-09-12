@@ -189,8 +189,8 @@
         let matches = [];
 
         for (let user of Object.values(users)) {
-            if (isValidDate(user.date_of_birth)) {
-                if (isEqualMonthDay(date, moment(user.date_of_birth, DATE_FORMAT))) {
+            if (isValidDate(user.dateOfBirth)) {
+                if (isEqualMonthDay(date, moment(user.dateOfBirth, DATE_FORMAT))) {
                     matches.push(user);
                 }
             }
@@ -306,7 +306,7 @@
 
             if (users.length === 1) {
                 user = users[0];
-                user.date_of_birth = date;
+                user.dateOfBirth = date;
 
                 return msg.send(`Saving ${name}'s birthday.`);
             } else if (users.length > 1) {
@@ -346,11 +346,11 @@
 
             if (users.length === 1) {
                 user = users[0];
-                if (!user.date_of_birth) {
+                if (!user.dateOfBirth) {
                     return msg.send('A birth date is not specified for the user.');
                 }
 
-                user.date_of_birth = null;
+                user.dateOfBirth = null;
 
                 return msg.send(`Removing ${name}'s birthday.`);
             } else if (users.length > 1) {
@@ -365,8 +365,8 @@
             let message, messageItems;
 
             messageItems = Object.values(robot.brain.data.users)
-                .filter(user => isValidDate(user.date_of_birth))
-                .map(user => `${user.name} was born on ${user.date_of_birth}`);
+                .filter(user => isValidDate(user.dateOfBirth))
+                .map(user => `${user.name} was born on ${user.dateOfBirth}`);
 
             message = messageItems.length === 0 ? 'Oops... No results.' : messageItems.join('\n');
 
