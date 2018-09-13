@@ -262,15 +262,16 @@
         let users = findUsersBornOnDate(moment(), robot.brain.data.users);
 
         if (users.length > 0) {
+            let userNames = users.map(user => `@${user.name}`);
+            let messageText = `Today is birthday of ${userNames.join(' and ')}!\n${quote()}`;
             grabTenorImage()
                 .then(function (imageUrl) {
-                    let messageText,
-                        userNames = users.map(user => `@${user.name}`);
-
-                    messageText = `${imageUrl || ''}\nToday is birthday of ${userNames.join(' and ')}!\n${quote()}`;
-                    robot.messageRoom("general", messageText);
+                    robot.messageRoom("general", `${imageUrl || ''}\n${messageText}`);
                 })
-                .catch(e => robot.logger.error(e));
+                .catch((e) => {
+                    robot.messageRoom("general", messageText);
+                    robot.logger.error(e);
+                });
         }
     }
 
