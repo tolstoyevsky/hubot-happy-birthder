@@ -414,7 +414,7 @@
 
     // Print sorted users birthdays.
     robot.respond(routes.list, function (msg) {
-      let message, sortedUserArray, userArray, sortedByTodayUserArray
+      let message, userArray
 
       userArray = Object.values(robot.brain.data.users)
         .filter(user => isValidDate(user.dateOfBirth))
