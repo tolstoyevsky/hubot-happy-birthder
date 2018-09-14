@@ -11,6 +11,9 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 * Fetches a random GIF using the `thesimpsonsbirthday+simpsonsbirthday+futuramabirthday+rickandmortybirthday` search query before writing a birthday message to a birthday boy/girl. The query (called "search term" in the Tenor terminology) is configurable via the `TENOR_SEARCH_TERM`environment variable. See the set of images associated with the search term used by default [here](https://tenor.com/search/thesimpsonsbirthday-simpsonsbirthday-futuramabirthday-rickandmortybirthday-gifs).
 * Writes birthday messages to `#general`.
 * Reminds users of the upcoming birthdays. It's possible to specify how long before the event occurs the reminder should be triggered.
+* Provides fault tolerance:
+  * if Tenor is for some reason unavailable right now, the script will try to request it a number of times with delays;
+  * if all the requests failed, users will receive their birthday messages anyway.
 
 ## Prerequisites
 
