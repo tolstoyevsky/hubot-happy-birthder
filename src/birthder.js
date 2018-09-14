@@ -90,7 +90,8 @@
    * @returns {Promise<string|*>} image URL
    */
   async function grabTenorImage () {
-    let imageUrl, response
+    let imageUrl
+    let response
 
     const tenorKeyUrl = `https://api.tenor.com/v1/anonid?key=${TENOR_API_KEY}`
 
@@ -215,7 +216,10 @@
    * @param {Object} robot - Hubot instance.
    */
   function sendReminders (robot, amountOfTime, unitOfTime) {
-    let targetDay = moment(), userNames, users, message 
+    let targetDay = moment()
+    let userNames
+    let users
+    let message
 
     targetDay.add(amountOfTime, unitOfTime)
     users = findUsersBornOnDate(targetDay, robot.brain.data.users)
@@ -327,9 +331,9 @@
   }
 
   module.exports = function (robot) {
-    const regExpUsername = new RegExp(/(?:@?(.+))/),
-      regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/),
-        regExpShortDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2]))\b/)
+    const regExpUsername = new RegExp(/(?:@?(.+))/)
+    const regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/)
+    const regExpShortDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2]))\b/)
 
     const routes = {
       set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
@@ -345,7 +349,10 @@
 
     // Link together the specified birthday and user and store the link in the brain.
     robot.respond(routes.set, async (msg) => {
-      let date, name, user, users
+      let date
+      let name
+      let user
+      let users
 
       if (!await isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
@@ -370,7 +377,10 @@
 
     // Print the users names whose birthdays match the specified date.
     robot.respond(routes.check, async (msg) => {
-      let date, users, userNames, message
+      let date
+      let message
+      let users
+      let userNames
 
       date = msg.match[2]
       users = findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users)
@@ -387,7 +397,9 @@
 
     // Delete the birthday associated with the specified user name.
     robot.respond(routes.delete, async (msg) => {
-      let name = msg.match[2].trim(), user, users
+      let name = msg.match[2].trim()
+      let user
+      let users
 
       if (!await isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
@@ -414,7 +426,8 @@
 
     // Print sorted users birthdays.
     robot.respond(routes.list, function (msg) {
-      let message, userArray
+      let message
+      let userArray
 
       userArray = Object.values(robot.brain.data.users)
         .filter(user => isValidDate(user.dateOfBirth))
