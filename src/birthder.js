@@ -103,13 +103,13 @@
       })
     }
 
-    const retryFetch = (url, retries=60, retryDelay=1000) => {
+    const retryFetch = (url, retries = 60, retryDelay = 1000) => {
       return new Promise((resolve, reject) => {
         const wrapper = n => {
           nFetch(url)
             .then(res => { resolve(res) })
             .catch(async err => {
-              if(n > 0) {
+              if (n > 0) {
                 console.log(`Retrying to request ${url}. ${n} attempts left.`)
                 await delay(retryDelay)
                 wrapper(--n)
@@ -117,23 +117,22 @@
                 reject(err)
               }
             })
-          }
+        }
 
         wrapper(retries)
       })
     }
 
-    const requestTenor = async () =>
-      await (await retryFetch(tenorKeyUrl)
-        .then(res => res.json())
-        .then(async (res) => {
-          const anonId = res.anon_id
-          const searchUrl = `https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`
+    const requestTenor = async () => retryFetch(tenorKeyUrl)
+      .then(res => res.json())
+      .then(async (res) => {
+        const anonId = res.anon_id
+        const searchUrl = `https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`
 
-          response = await retryFetch(searchUrl)
+        response = await retryFetch(searchUrl)
 
-          return response
-        }))
+        return response
+      })
 
     response = await requestTenor()
     imageUrl = selectTenorImageUrl(await response.json())
@@ -197,10 +196,10 @@
    *
    * @param {Object} users - User object where each key is the user instance.
    * @param {moment} targetDay - Date today
-   * @param {number} amountOfTime - Amount of time before birthday 
+   * @param {number} amountOfTime - Amount of time before birthday
    * @returns {string}
    */
-   function formReminderMessage (users, targetDay, amountOfTime) {
+  function formReminderMessage (users, targetDay, amountOfTime) {
     const usernames = users.map(user => user.name)
     const commaSeparatedUsernames = usernames.map(name => `@${name}`).join(', ')
     const toBe = users.length > 1 ? 'are' : 'is'
@@ -208,7 +207,7 @@
     const message = `${commaSeparatedUsernames} ${toBe} having a birthday ${when}.`
 
     return message
-   }
+  }
 
   /**
    * Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
@@ -262,25 +261,25 @@
     }
   }
 
-   /**
-  *Compare subarrays by month, day and then merge them
-  *
-  *@param {array} left - Subarray
-  *@param {array} right - Subarray
-  *@returns {array} - Sorted array
-  */
+  /**
+   * Compare subarrays by month, day and then merge them
+   *
+   * @param {array} left - Subarray
+   * @param {array} right - Subarray
+   * @returns {array} - Sorted array
+   */
   function merge (left, right) {
-    var result  = []
+    var result = []
     var indexLeft = 0
     var indexRight = 0
 
-    while (indexLeft < left.length && indexRight < right.length){
+    while (indexLeft < left.length && indexRight < right.length) {
       var montLeft = parseInt(left[indexLeft][0][1])
       var monthRight = parseInt(right[indexRight][0][1])
       var dayLeft = parseInt(left[indexLeft][0][0])
       var dayRight = parseInt(right[indexRight][0][0])
 
-      if (montLeft < monthRight){
+      if (montLeft < monthRight) {
         result.push(left[indexLeft++])
       } else if (montLeft > monthRight) {
         result.push(right[indexRight++])
@@ -295,11 +294,11 @@
   }
 
   /**
-  *Split array to subarrays and handle merge sort
-  *
-  *@param {array} items - Array of arrays [[dayOfBirthday, monthOfBirthday], username]
-  *returns {array} - Sorted array
-  */
+   * Split array to subarrays and handle merge sort
+   *
+   * @param {array} items - Array of arrays [[dayOfBirthday, monthOfBirthday], username]
+   * returns {array} - Sorted array
+   */
   function mergeSort (items) {
     if (items.length < 2) {
       return items
@@ -313,21 +312,20 @@
   }
 
   /**
-  *Add element with date today, call merge sort and shift sorted array in order of date today
-  *
-  *@param {array} sortedUserArray - Sorted by month, day array of arrays [[dayOfBirthday, monthOfBirthday], username]
-  *@returns {array} - Started from date after today sortedUserArray
-  */
+   * Add element with date today, call merge sort and shift sorted array in order of date today
+   *
+   * @param {array} sortedUserArray - Sorted by month, day array of arrays [[dayOfBirthday, monthOfBirthday], username]
+   * @returns {array} - Started from date after today sortedUserArray
+   */
   function sortedByToday (userArray) {
     const dateToday = [moment().format('DD-MM').split('-')]
     userArray.push(dateToday)
 
     const result = mergeSort(userArray)
     const index = result.indexOf(dateToday)
-    const sortedSearch = result.slice(index+1).concat(result.slice(0, index))
+    const sortedSearch = result.slice(index + 1).concat(result.slice(0, index))
 
     return sortedSearch
-
   }
 
   module.exports = function (robot) {

@@ -3,7 +3,6 @@
 const path = require('path')
 
 module.exports = (robot) => {
-    const scriptsPath = path.resolve(__dirname, 'src')
-    robot.loadFile(scriptsPath, 'birthder.js')
+  const scriptsPath = path.resolve(__dirname, 'src')
+  robot.loadFile(scriptsPath, 'birthder.js')
 }
-
