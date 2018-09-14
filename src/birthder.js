@@ -225,12 +225,12 @@
     if (users.length > 0) {
       for (let user of Object.values(robot.brain.data.users)) {
         if (userNames.indexOf(user.name) === -1) {
-          robot.adapter.sendDirect({user: {name: user.name}}, message)
+          robot.adapter.sendDirect({ user: { name: user.name } }, message)
         } else if (users.length > 1) {
           const usersCopy = users.splice(0)
           usersCopy.splice(usersCopy.indexOf(user), 1)
           message = formReminderMessage(usersCopy, targetDay, amountOfTime)
-          robot.adapter.sendDirect({user: {name: user.name}}, message)
+          robot.adapter.sendDirect({ user: { name: user.name } }, message)
         }
       }
     }
