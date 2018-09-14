@@ -1,3 +1,5 @@
+[![build](https://travis-ci.com/tolstoyevsky/hubot-happy-birthder.svg?branch=master)](https://travis-ci.org/tolstoyevsky/hubot-happy-birthder)
+
 # hubot-happy-birthder
 
 Hubot script for writing birthday messages to users. It uses [Tenor](https://tenor.com) GIFs to make the messages more lively.
