@@ -18,31 +18,31 @@
   const path = require('path')
   const fs = require('fs')
 
-  const TENOR_API_KEY = process.env.TENOR_API_KEY || ""
+  const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
-  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || "thesimpsonsbirthday+simpsonsbirthday+futuramabirthday+rickandmortybirthday"
-  const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || "0 0 7 * * *"
-  const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || "0 0 7 * * *"
+  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+simpsonsbirthday+futuramabirthday+rickandmortybirthday'
+  const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || '0 0 7 * * *'
+  const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || '0 0 7 * * *'
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
-  const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || "days"
+  const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || 'days'
 
-  const MSG_PERMISSION_DENIED = "Permission denied."
+  const MSG_PERMISSION_DENIED = 'Permission denied.'
 
   // Here are the INPUT format strings which are suitable for the following cases:
   // * "DD.MM.YYYY", "D.M.YYYY"
   // * "DD.MM", "D.M"
   // See https://momentjs.com/docs/#/parsing/string-format/ for details.
-  const DATE_FORMAT = "D.M.YYYY" 
-  const SHORT_DATE_FORMAT = "D.M"
+  const DATE_FORMAT = 'D.M.YYYY'
+  const SHORT_DATE_FORMAT = 'D.M'
 
   // Here are the OUTPUT format strings, they follow other rules;
   // See https://momentjs.com/docs/#/displaying/ for details.
-  const OUTPUT_SHORT_DATE_FORMAT = "DD.MM"
-  const OUTPUT_DATE_FORMAT = "DD.MM.YYYY"
+  const OUTPUT_SHORT_DATE_FORMAT = 'DD.MM'
+  const OUTPUT_DATE_FORMAT = 'DD.MM.YYYY'
 
   const QUOTES_PATH = path.join(__dirname, '/quotes.txt')
-  const QUOTES = fs.readFileSync(QUOTES_PATH, 'utf8').toString().split("\n")
+  const QUOTES = fs.readFileSync(QUOTES_PATH, 'utf8').toString().split('\n')
 
   /**
    * Use API to check if the specified user is admin.
@@ -68,7 +68,7 @@
     }
   }
 
-  const getAmbiguousUserText = users => `Be more specific, I know ${users.length} people named like that: ${(Array.from(users).map((user) => user.name)).join(", ")}`
+  const getAmbiguousUserText = users => `Be more specific, I know ${users.length} people named like that: ${(Array.from(users).map((user) => user.name)).join(', ')}`
 
   /**
    * Select a random image URL from a list of images (returned by the search).
@@ -158,7 +158,7 @@
    * @returns {boolean}
    */
   function isValidDate(date) {
-    return typeof date === "string" && moment(date, DATE_FORMAT, true).isValid()
+    return typeof date === 'string' && moment(date, DATE_FORMAT, true).isValid()
   }
 
   /**
@@ -249,10 +249,10 @@
       let messageText = `Today is birthday of ${userNames.join(' and ')}!\n${quote()}`
       grabTenorImage()
         .then(function (imageUrl) {
-          robot.messageRoom("general", `${imageUrl || ''}\n${messageText}`)
+          robot.messageRoom('general', `${imageUrl || ''}\n${messageText}`)
         })
         .catch((e) => {
-          robot.messageRoom("general", messageText)
+          robot.messageRoom('general', messageText)
           robot.logger.error(e)
         })
     }
@@ -315,7 +315,7 @@
   *@returns {array} - Started from date after today sortedUserArray
   */
   function sortedByToday(userArray) {
-    const dateToday = [moment().format("DD-MM").split('-')]
+    const dateToday = [moment().format('DD-MM').split('-')]
     userArray.push(dateToday)
 
     const result = mergeSort(userArray)
@@ -338,8 +338,8 @@
       list: new RegExp(/birthdays list$/, 'i')
     }
 
-    if (TENOR_API_KEY === "") {
-      robot.logger.error("TENOR_API_KEY is a mandatory parameter, however it's not specified.")
+    if (TENOR_API_KEY === '') {
+      robot.logger.error('TENOR_API_KEY is a mandatory parameter, however it\'s not specified.')
       return
     }
 
@@ -376,7 +376,7 @@
       users = findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users)
 
       if (users.length === 0) {
-        return msg.send("Could not find any user with the specified birthday.")
+        return msg.send('Could not find any user with the specified birthday.')
       }
 
       userNames = users.map(user => `@${user.name}`)
