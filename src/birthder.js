@@ -50,7 +50,7 @@
    * @param {string} username  Username
    * @return {boolean|undefined} If user is admin
    */
-  async function isAdmin(robot, username) {
+  async function isAdmin (robot, username) {
     try {
       const info = await robot.adapter.api.get('users.info', { username: username })
 
@@ -76,7 +76,7 @@
    * @param {Object} response - Response object from the node-fetch package.
    * @returns {string} image URL
    */
-  function selectTenorImageUrl(response) {
+  function selectTenorImageUrl (response) {
     let items = response.results
     let randomItems = items[Math.floor(Math.random() * items.length)]
 
@@ -89,7 +89,7 @@
    *
    * @returns {Promise<string|*>} image URL
    */
-  async function grabTenorImage() {
+  async function grabTenorImage () {
     let imageUrl, response
 
     const tenorKeyUrl = `https://api.tenor.com/v1/anonid?key=${TENOR_API_KEY}`
@@ -147,7 +147,7 @@
    * @param {moment} secondsDate
    * @returns {boolean}
    */
-  function isEqualMonthDay(firstDate, secondsDate) {
+  function isEqualMonthDay (firstDate, secondsDate) {
     return (firstDate.month() === secondsDate.month()) && (firstDate.date() === secondsDate.date())
   }
 
@@ -157,7 +157,7 @@
    * @param {string} date
    * @returns {boolean}
    */
-  function isValidDate(date) {
+  function isValidDate (date) {
     return typeof date === 'string' && moment(date, DATE_FORMAT, true).isValid()
   }
 
@@ -168,7 +168,7 @@
    * @param {Object} users - User object where each key is the user instance.
    * @returns {Array}
    */
-  function findUsersBornOnDate(date, users) {
+  function findUsersBornOnDate (date, users) {
     let matches = []
 
     for (let user of Object.values(users)) {
@@ -187,7 +187,7 @@
    *
    * @returns {string}
    */
-  function quote() {
+  function quote () {
     return QUOTES[(Math.random() * QUOTES.length) >> 0]
   }
 
@@ -214,7 +214,7 @@
    *
    * @param {Object} robot - Hubot instance.
    */
-  function sendReminders(robot, amountOfTime, unitOfTime) {
+  function sendReminders (robot, amountOfTime, unitOfTime) {
     let targetDay = moment(), userNames, users, message 
 
     targetDay.add(amountOfTime, unitOfTime)
@@ -241,7 +241,7 @@
    *
    * @param {Object} robot - Hubot instance.
    */
-  function sendCongratulations(robot) {
+  function sendCongratulations (robot) {
     let users = findUsersBornOnDate(moment(), robot.brain.data.users)
 
     if (users.length > 0) {
@@ -265,7 +265,7 @@
   *@param {array} right - Subarray
   *@returns {array} - Sorted array
   */
-  function merge(left, right) {
+  function merge (left, right) {
     var result  = []
     var indexLeft = 0
     var indexRight = 0
@@ -296,7 +296,7 @@
   *@param {array} items - Array of arrays [[dayOfBirthday, monthOfBirthday], username]
   *returns {array} - Sorted array
   */
-  function mergeSort(items) {
+  function mergeSort (items) {
     if (items.length < 2) {
       return items
     }
@@ -314,7 +314,7 @@
   *@param {array} sortedUserArray - Sorted by month, day array of arrays [[dayOfBirthday, monthOfBirthday], username]
   *@returns {array} - Started from date after today sortedUserArray
   */
-  function sortedByToday(userArray) {
+  function sortedByToday (userArray) {
     const dateToday = [moment().format('DD-MM').split('-')]
     userArray.push(dateToday)
 
