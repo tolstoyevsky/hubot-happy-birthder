@@ -230,7 +230,7 @@
         if (userNames.indexOf(user.name) === -1) {
           robot.adapter.sendDirect({ user: { name: user.name } }, message)
         } else if (users.length > 1) {
-          const usersCopy = users.splice(0)
+          const usersCopy = users.slice(0)
           usersCopy.splice(usersCopy.indexOf(user), 1)
           message = formReminderMessage(usersCopy, targetDay, amountOfTime)
           robot.adapter.sendDirect({ user: { name: user.name } }, message)
