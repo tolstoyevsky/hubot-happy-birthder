@@ -8,4 +8,5 @@ We thank all the contributors to the project. Here are the full list of the peop
 * [Mikhail Sibiryov](https://github.com/ukhryab)
 * [Sergei Bogolepov](https://github.com/Sergei-vb)
 * [Polina Popova](https://github.com/polina-popova)
+* [Anton Maksimovich](https://github.com/ABSLord)
 
