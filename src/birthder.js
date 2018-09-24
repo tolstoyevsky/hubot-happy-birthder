@@ -17,6 +17,7 @@
   const nFetch = require('node-fetch')
   const path = require('path')
   const fs = require('fs')
+  const routines = require('hubot-routines')
 
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
