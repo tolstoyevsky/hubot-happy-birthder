@@ -20,7 +20,7 @@
 
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
-  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+simpsonsbirthday+futuramabirthday+rickandmortybirthday'
+  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+futuramabirthday+rickandmortybirthday'
   const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || '0 0 7 * * *'
   const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || '0 0 7 * * *'
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
