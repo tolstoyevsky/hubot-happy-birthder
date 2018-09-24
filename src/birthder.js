@@ -68,6 +68,40 @@
     }
   }
 
+  /**
+   * Create a channel and invite all the users to it except the one specified via username.
+   * @param {Robot} robot Hubot instance
+   * @param {string} username Username of birthday boy/girl
+   * @returns {Void}
+   */
+  const createBirthdayChannel = async (robot, username) => {
+    const message = `@${username} is having a birthday soon, so let's discuss a present.`
+    const channelName = `${username}-birthday-channel`
+    const users = Object.values(robot.brain.data.users)
+      .filter(user => user.name !== username)
+      .map(user => user.name)
+    const room = await robot.adapter.api.post('groups.create', {
+      name: channelName,
+      members: users
+    })
+    robot.messageRoom(room.group.name, message)
+  }
+
+  /**
+   * Check if the bot is in the birthday channel
+   * @param {Robot} robot Hubot instance
+   * @param {string} username Username of birthday boy/girl
+   * @returns {boolean}
+   */
+  const isBotInBirthdayChannel = async (robot, username) => {
+    const channelName = `${username}-birthday-channel`
+    const groupList = await robot.adapter.api.get('groups.list')
+    if (groupList.groups.filter(item => item.name === channelName).length) {
+      return true
+    }
+    return false
+  }
+
   const getAmbiguousUserText = users => `Be more specific, I know ${users.length} people named like that: ${(Array.from(users).map((user) => user.name)).join(', ')}`
 
   /**
@@ -210,11 +244,34 @@
   }
 
   /**
+   * Find all the birthdays which were yesterday and remove the channels created for them.
+   * @param {Robot} robot Hubot instance
+   * @returns {Void}
+   */
+  async function removeExpiredBirthdayChannels (robot) {
+    let targetDay = moment()
+    let users
+    let channelName
+
+    targetDay.add(-1, 'day')
+    users = findUsersBornOnDate(targetDay, robot.brain.data.users)
+
+    if (users.length) {
+      for (let user of users) {
+        if (await isBotInBirthdayChannel(robot, user.name)) {
+          channelName = `${user.name}-birthday-channel`
+          await robot.adapter.api.post('groups.delete', { roomName: channelName })
+        }
+      }
+    }
+  }
+
+  /**
    * Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
    *
    * @param {Object} robot - Hubot instance.
    */
-  function sendReminders (robot, amountOfTime, unitOfTime) {
+  async function sendReminders (robot, amountOfTime, unitOfTime) {
     let targetDay = moment()
     let userNames
     let users
@@ -226,6 +283,12 @@
     message = formReminderMessage(users, targetDay, amountOfTime)
 
     if (users.length > 0) {
+      for (let user of users) {
+        if (!await isBotInBirthdayChannel(robot, user.name)) {
+          await createBirthdayChannel(robot, user.name)
+        }
+      }
+
       for (let user of Object.values(robot.brain.data.users)) {
         if (userNames.indexOf(user.name) === -1) {
           robot.adapter.sendDirect({ user: { name: user.name } }, message)
@@ -455,6 +518,10 @@
 
     if (ANNOUNCER_CRON_STRING) {
       schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot, 1, 'day'))
+    }
+
+    if (ANNOUNCER_CRON_STRING) {
+      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => removeExpiredBirthdayChannels(robot))
     }
   }
 }).call(this)
