@@ -16,6 +16,7 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 * Provides fault tolerance:
   * if Tenor is for some reason unavailable right now, the script will try to request it a number of times with delays;
   * if all the requests failed, users will receive their birthday messages anyway.
+* Creates private channels in advance and invites all the users to the channels except the birthday boys/girls for the purpose of discussing the presents for them. Expired channels are automatically removed.
 
 ## Prerequisites
 
