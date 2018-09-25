@@ -12,11 +12,11 @@
 //
 
 (function () {
-  const schedule = require('node-schedule')
+  const fs = require('fs')
   const moment = require('moment')
   const nFetch = require('node-fetch')
+  const schedule = require('node-schedule')
   const path = require('path')
-  const fs = require('fs')
   const routines = require('hubot-routines')
 
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
@@ -53,23 +53,6 @@
    * @param {string} username  Username
    * @return {boolean|undefined} If user is admin
    */
-  async function isAdmin (robot, username) {
-    try {
-      const info = await robot.adapter.api.get('users.info', { username: username })
-
-      if (!info.user) {
-        throw new Error('No user data returned')
-      }
-
-      if (!info.user.roles) {
-        throw new Error('User data did not include roles')
-      }
-
-      return info.user.roles.indexOf('admin') !== -1
-    } catch (err) {
-      robot.logger.error('Could not get user data with bot, ensure it has `view-full-other-user-info` permission', err)
-    }
-  }
 
   /**
    * Create a channel and invite all the users to it except the one specified via username.
@@ -202,9 +185,6 @@
    * @param {string} date
    * @returns {boolean}
    */
-  function isValidDate (date) {
-    return typeof date === 'string' && moment(date, DATE_FORMAT, true).isValid()
-  }
 
   /**
    * Find the users who have the same birthday.
@@ -217,7 +197,7 @@
     let matches = []
 
     for (let user of Object.values(users)) {
-      if (isValidDate(user.dateOfBirth)) {
+      if (routines.isValidDate(user.dateOfBirth)) {
         if (isEqualMonthDay(date, moment(user.dateOfBirth, DATE_FORMAT))) {
           matches.push(user)
         }
@@ -340,7 +320,7 @@
         })
         .catch((e) => {
           robot.messageRoom('general', messageText)
-          robot.logger.error(e)
+          routines.rave(e)
         })
     }
   }
@@ -425,7 +405,7 @@
     }
 
     if (TENOR_API_KEY === '') {
-      robot.logger.error('TENOR_API_KEY is a mandatory parameter, however it\'s not specified.')
+      routines.rave('TENOR_API_KEY is a mandatory parameter, however it\'s not specified.')
       return
     }
 
@@ -436,7 +416,7 @@
       let user
       let users
 
-      if (!await isAdmin(robot, msg.message.user.name.toString())) {
+      if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
         return
       }
@@ -483,7 +463,7 @@
       let user
       let users
 
-      if (!await isAdmin(robot, msg.message.user.name.toString())) {
+      if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
         return
       }
@@ -508,12 +488,13 @@
 
     // Print sorted users birthdays.
     robot.respond(routes.list, function (msg) {
+      console.log("____________________________________ДАУН__________________________________")
       let message
       let rich = {}
       let userArray
 
       userArray = Object.values(robot.brain.data.users)
-        .filter(user => isValidDate(user.dateOfBirth))
+        .filter(user => routines.isValidDate(user.dateOfBirth))
         .map(user => [user.dateOfBirth.split('.').slice(0, 3), user.name])
 
       var result = sortedByToday(userArray)

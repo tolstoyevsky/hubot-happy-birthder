@@ -19,7 +19,8 @@
       "moment": "^2.22.2",
       "node-schedule": "^0.6.0",
       "node-fetch": "^2.1.2",
-      "hubot-routines": "git://github.com/desa85/hubot-routines.git"
+      "hubot-routines": "0.0.2",
+      "hubot-routines": "https://github.com/tolstoyevsky/hubot-routines.git#initial"
   },
   "devDependencies": {
     "eslint": "^5.5.0",
