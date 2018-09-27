@@ -79,15 +79,21 @@
   const createBirthdayChannel = async (robot, username) => {
     const message = BIRTHDAY_CHANNEL_MESSAGE
       .replace(/%username%/g, username)
-    const channelName = `${username}-birthday-channel`
+    const now = moment()
+    const dayMonth = now.format('DD.MM')
+    const channelName = `${username}-birthday-channel-${dayMonth}-id${now.milliseconds()}`
     const users = Object.values(robot.brain.data.users)
       .filter(user => user.name !== username)
       .map(user => user.name)
-    const room = await robot.adapter.api.post('groups.create', {
+    await robot.adapter.api.post('groups.create', {
       name: channelName,
       members: users
     })
-    robot.messageRoom(room.group.name, message)
+    const userInstance = robot.brain.userForName(username)
+    userInstance.birthdayChannel = {
+      roomName: channelName
+    }
+    robot.messageRoom(channelName, message)
   }
 
   /**
@@ -97,9 +103,8 @@
    * @returns {boolean}
    */
   const isBotInBirthdayChannel = async (robot, username) => {
-    const channelName = `${username}-birthday-channel`
-    const groupList = await robot.adapter.api.get('groups.list')
-    if (groupList.groups.filter(item => item.name === channelName).length) {
+    const userInstance = robot.brain.userForName(username)
+    if (userInstance.birthdayChannel) {
       return true
     }
     return false
@@ -266,8 +271,12 @@
     if (users.length) {
       for (let user of users) {
         if (await isBotInBirthdayChannel(robot, user.name)) {
-          channelName = `${user.name}-birthday-channel`
-          await robot.adapter.api.post('groups.delete', { roomName: channelName })
+          const userInstance = robot.brain.userForName(user.name)
+          if (userInstance.birthdayChannel) {
+            channelName = userInstance.birthdayChannel.roomName
+            await robot.adapter.api.post('groups.delete', { roomName: channelName })
+            delete userInstance.birthdayChannel
+          }
         }
       }
     }
