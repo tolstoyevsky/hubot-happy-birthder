@@ -23,6 +23,7 @@
   const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday'
   const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || '0 0 7 * * *'
   const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || '0 0 7 * * *'
+  const BIRTHDAY_CHANNEL_MESSAGE = process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.'
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || 'days'
@@ -76,7 +77,8 @@
    * @returns {Void}
    */
   const createBirthdayChannel = async (robot, username) => {
-    const message = `@${username} is having a birthday soon, so let's discuss a present.`
+    const message = BIRTHDAY_CHANNEL_MESSAGE
+      .replace(/%username%/g, username)
     const channelName = `${username}-birthday-channel`
     const users = Object.values(robot.brain.data.users)
       .filter(user => user.name !== username)
