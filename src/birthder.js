@@ -26,6 +26,7 @@
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || 'days'
+  const CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
 
   const MSG_PERMISSION_DENIED = 'Permission denied.'
 
@@ -249,6 +250,10 @@
    * @returns {Void}
    */
   async function removeExpiredBirthdayChannels (robot) {
+    if (!CREATE_BIRTHDAY_CHANNELS) {
+      return
+    }
+
     let targetDay = moment()
     let users
     let channelName
@@ -283,9 +288,11 @@
     message = formReminderMessage(users, targetDay, amountOfTime)
 
     if (users.length > 0) {
-      for (let user of users) {
-        if (!await isBotInBirthdayChannel(robot, user.name)) {
-          await createBirthdayChannel(robot, user.name)
+      if (CREATE_BIRTHDAY_CHANNELS) {
+        for (let user of users) {
+          if (!await isBotInBirthdayChannel(robot, user.name)) {
+            await createBirthdayChannel(robot, user.name)
+          }
         }
       }
 
