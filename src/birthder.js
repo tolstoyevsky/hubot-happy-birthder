@@ -16,6 +16,7 @@
   const moment = require('moment')
   const nFetch = require('node-fetch')
   const path = require('path')
+  const routines = require('hubot-routines')
   const schedule = require('node-schedule')
 
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
@@ -47,31 +48,6 @@
 
   const QUOTES_PATH = path.join(__dirname, '/quotes.txt')
   const QUOTES = fs.readFileSync(QUOTES_PATH, 'utf8').toString().split('\n')
-
-  /**
-   * Use API to check if the specified user is admin.
-   *
-   * @param {Robot} robot - Hubot instance.
-   * @param {string} username - Username.
-   * @return {boolean|undefined} - If user is admin or not.
-   */
-  async function isAdmin (robot, username) {
-    try {
-      const info = await robot.adapter.api.get('users.info', { username: username })
-
-      if (!info.user) {
-        throw new Error('No user data returned')
-      }
-
-      if (!info.user.roles) {
-        throw new Error('User data did not include roles')
-      }
-
-      return info.user.roles.indexOf('admin') !== -1
-    } catch (err) {
-      robot.logger.error('Could not get user data with bot, ensure it has `view-full-other-user-info` permission', err)
-    }
-  }
 
   /**
    * Create a channel and invite all the users to it except the one specified via username.
@@ -201,16 +177,6 @@
   }
 
   /**
-   * Check if the specified date string follows the format stored in the DATE_FORMAT constant.
-   *
-   * @param {string} date - Date to be validated.
-   * @returns {boolean}
-   */
-  function isValidDate (date) {
-    return typeof date === 'string' && moment(date, DATE_FORMAT, true).isValid()
-  }
-
-  /**
    * Find the users who have the same birthday.
    *
    * @param {Date} date - Date which will be used for the comparison.
@@ -221,7 +187,7 @@
     let matches = []
 
     for (let user of Object.values(users)) {
-      if (isValidDate(user.dateOfBirth)) {
+      if (routines.isValidDate(user.dateOfBirth, DATE_FORMAT)) {
         if (isEqualMonthDay(date, moment(user.dateOfBirth, DATE_FORMAT))) {
           matches.push(user)
         }
@@ -345,7 +311,7 @@
         })
         .catch((e) => {
           robot.messageRoom('general', messageText)
-          robot.logger.error(e)
+          routines.rave(robot, e)
         })
     }
   }
@@ -424,7 +390,7 @@
     const chExists = botChannels.channels.filter(item => item.name === BIRTHDAY_LOGGING_CHANNEL).length
     const grExists = botGroups.groups.filter(item => item.name === BIRTHDAY_LOGGING_CHANNEL).length
     if (!chExists && !grExists) {
-      robot.logger.error(`Hubot is not in the group or channel named '${BIRTHDAY_LOGGING_CHANNEL}'`)
+      routines.rave(robot, `Hubot is not in the group or channel named '${BIRTHDAY_LOGGING_CHANNEL}'`)
       return
     }
 
@@ -440,7 +406,7 @@
     }
 
     if (TENOR_API_KEY === '') {
-      robot.logger.error('TENOR_API_KEY is a mandatory parameter, however it\'s not specified.')
+      routines.rave(robot, 'TENOR_API_KEY is a mandatory parameter, however it\'s not specified.')
       return
     }
 
@@ -480,7 +446,7 @@
       const date = msg.match[1]
 
       if (!user.dateOfBirth) {
-        if (isValidDate(date)) {
+        if (routines.isValidDate(date)) {
           user.dateOfBirth = date
           msg.send('I memorized you birthday, well done! :wink:')
           robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `All right, @${user.name}'s birthday was specified!`)
@@ -497,7 +463,7 @@
       let user
       let users
 
-      if (!await isAdmin(robot, msg.message.user.name.toString())) {
+      if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
         return
       }
@@ -544,7 +510,7 @@
       let user
       let users
 
-      if (!await isAdmin(robot, msg.message.user.name.toString())) {
+      if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
         return
       }
@@ -574,7 +540,7 @@
       let userArray
 
       userArray = Object.values(robot.brain.data.users)
-        .filter(user => isValidDate(user.dateOfBirth))
+        .filter(user => routines.isValidDate(user.dateOfBirth, DATE_FORMAT))
         .map(user => [user.dateOfBirth.split('.').slice(0, 3), user.name])
 
       var result = sortedByCurrentDate(userArray)
