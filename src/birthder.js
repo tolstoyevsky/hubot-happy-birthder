@@ -26,7 +26,6 @@
   const BIRTHDAY_CHANNEL_MESSAGE = process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.'
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
-  const BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE = process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE || 'days'
   const CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
 
   const MSG_PERMISSION_DENIED = 'Permission denied.'
@@ -532,7 +531,7 @@
     // Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
 
     if (ANNOUNCER_CRON_STRING) {
-      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot, BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, BIRTHDAY_ANNOUNCEMENT_BEFORE_MODE))
+      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot, BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 'days'))
     }
 
     if (ANNOUNCER_CRON_STRING) {
