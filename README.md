@@ -50,6 +50,7 @@ The script can be configured via the following environment variables (called par
 | `BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT`  | Sets how long before the event occurs the reminder will be triggered. | 7 |
 | `CREATE_BIRTHDAY_CHANNELS` | Specifies whether to create the birthday channels for the purpose of discussing presents for birthday boys/girls. All the users are invited to the channel except the birthday boy/girl. | false |
 | `BIRTHDAY_CHANNEL_MESSAGE` | Allows changing the message written in the birthday channel. | `@%username% is having a birthday soon, so let's discuss a present.` |
+| `BIRTHDAY_CHANNEL_BLACKLIST` | A comma separated list of the users which won't be invited to the birthday channel when it's created. | |
 
 ## Example Interaction
 

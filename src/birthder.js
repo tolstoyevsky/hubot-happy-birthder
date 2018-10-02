@@ -26,6 +26,7 @@
   const BIRTHDAY_CHANNEL_MESSAGE = process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.'
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
+  const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
   const CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
 
   const MSG_PERMISSION_DENIED = 'Permission denied.'
@@ -80,7 +81,9 @@
       .replace(/%username%/g, username)
     const channelName = `${username}-birthday-channel`
     const users = Object.values(robot.brain.data.users)
-      .filter(user => user.name !== username)
+      .filter(user => {
+        return user.name !== username && !BIRTHDAY_CHANNEL_BLACKLIST.includes(user.name)
+      })
       .map(user => user.name)
     const room = await robot.adapter.api.post('groups.create', {
       name: channelName,
