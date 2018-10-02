@@ -18,6 +18,9 @@
   const path = require('path')
   const fs = require('fs')
 
+  const INIT_STATE = 0
+  const CONFIRM_STATE = 1
+
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
   const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday'
@@ -411,6 +414,14 @@
     return sortedSearch
   }
 
+  function getStateFromBrain (robot, username) {
+    const users = robot.brain.usersForFuzzyName(username)
+
+    users[0].happyBirthder = users[0].happyBirthder || {}
+
+    return users[0].happyBirthder
+  }
+
   module.exports = function (robot) {
     const regExpUsername = new RegExp(/(?:@?(.+))/)
     const regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/)
@@ -420,7 +431,8 @@
       set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
       delete: new RegExp(/(birthday delete)\s+/.source + regExpUsername.source + /\b/.source, 'i'),
       check: new RegExp(/(birthdays on)\s+/.source + regExpShortDate.source, 'i'),
-      list: new RegExp(/birthdays list$/, 'i')
+      list: new RegExp(/birthdays list$/, 'i'),
+      confirm: new RegExp(/(birthday approve)\s+/.source + regExpUsername.source + /\s+/.source, 'i')
     }
 
     if (TENOR_API_KEY === '') {
@@ -434,6 +446,7 @@
       let name
       let user
       let users
+      let state
 
       if (!await isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
@@ -442,10 +455,16 @@
 
       name = msg.match[2].trim()
       date = msg.match[3]
+      state = getStateFromBrain(robot, name)
       users = robot.brain.usersForFuzzyName(name)
 
       if (users.length === 1) {
         user = users[0]
+        if (user.dateOfBirth !== undefined) {
+          state.n = INIT_STATE
+          users[0].expectDateOfBirth = date
+          return msg.send(`this user already has a birthday. Are you sure you want to change? (birthday approve @${name})`)
+        }
         user.dateOfBirth = date
 
         return msg.send(`Saving ${name}'s birthday.`)
@@ -456,6 +475,17 @@
       }
     })
 
+    robot.respond(routes.confirm, async (msg) => {
+      let name = msg.match[2].trim()
+      let user = robot.brain.usersForFuzzyName(name)[0]
+      const state = getStateFromBrain(robot, name)
+
+      if (state.n === INIT_STATE) {
+        user.dateOfBirth = user.expectDateOfBirth
+        state.n = CONFIRM_STATE
+        return msg.send(`Saving ${name}'s birthday.`)
+      }
+    })
     // Print the users names whose birthdays match the specified date.
     robot.respond(routes.check, async (msg) => {
       let date
