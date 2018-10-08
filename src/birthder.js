@@ -47,9 +47,10 @@
 
   /**
    * Use API to check if the specified user is admin.
-   * @param {Robot} robot    Hubot instance
-   * @param {string} username  Username
-   * @return {boolean|undefined} If user is admin
+   *
+   * @param {Robot} robot - Hubot instance.
+   * @param {string} username - Username.
+   * @return {boolean|undefined} - If user is admin or not.
    */
   async function isAdmin (robot, username) {
     try {
@@ -71,8 +72,9 @@
 
   /**
    * Create a channel and invite all the users to it except the one specified via username.
-   * @param {Robot} robot Hubot instance
-   * @param {string} username Username of birthday boy/girl
+   *
+   * @param {Robot} robot - Hubot instance.
+   * @param {string} username - Username of birthday boy/girl.
    * @returns {Void}
    */
   const createBirthdayChannel = async (robot, username) => {
@@ -96,9 +98,10 @@
   }
 
   /**
-   * Check if the bot is in the birthday channel
-   * @param {Robot} robot Hubot instance
-   * @param {string} username Username of birthday boy/girl
+   * Check if the bot is in the birthday channel.
+   *
+   * @param {Robot} robot - Hubot instance.
+   * @param {string} username - Username of birthday boy/girl.
    * @returns {boolean}
    */
   const isBotInBirthdayChannel = async (robot, username) => {
@@ -115,7 +118,7 @@
    * Select a random image URL from a list of images (returned by the search).
    *
    * @param {Object} response - Response object from the node-fetch package.
-   * @returns {string} image URL
+   * @returns {string} - Image URL.
    */
   function selectTenorImageUrl (response) {
     let items = response.results
@@ -128,7 +131,7 @@
    * Get an image URL through Tenor's GIF API.
    * TENOR_API_KEY, TENOR_SEARCH_TERM and TENOR_IMG_LIMIT are used as request params.
    *
-   * @returns {Promise<string|*>} image URL
+   * @returns {Promise<string|*>} - Image URL.
    */
   async function grabTenorImage () {
     let imageUrl
@@ -184,8 +187,8 @@
   /**
    * Check if two specified dates have the same month and day.
    *
-   * @param {moment} firstDate
-   * @param {moment} secondsDate
+   * @param {moment} firstDate - First date for comparison.
+   * @param {moment} secondsDate - Second date for comparison.
    * @returns {boolean}
    */
   function isEqualMonthDay (firstDate, secondsDate) {
@@ -195,7 +198,7 @@
   /**
    * Check if the specified date string follows the format stored in the DATE_FORMAT constant.
    *
-   * @param {string} date
+   * @param {string} date - Date to be validated.
    * @returns {boolean}
    */
   function isValidDate (date) {
@@ -236,8 +239,8 @@
    * Form a reminder message
    *
    * @param {Object} users - User object where each key is the user instance.
-   * @param {moment} targetDay - Date today
-   * @param {number} amountOfTime - Amount of time before birthday
+   * @param {moment} targetDay - Current date.
+   * @param {number} amountOfTime - Amount of time before birthday.
    * @returns {string}
    */
   function formReminderMessage (users, targetDay, amountOfTime) {
@@ -252,7 +255,8 @@
 
   /**
    * Find all the birthdays which were yesterday and remove the channels created for them.
-   * @param {Robot} robot Hubot instance
+   *
+   * @param {Robot} robot - Hubot instance.
    * @returns {Void}
    */
   async function removeExpiredBirthdayChannels (robot) {
@@ -342,11 +346,11 @@
   }
 
   /**
-   * Compare subarrays by month, day and then merge them
+   * Compare subarrays by month, day and then merge them.
    *
-   * @param {array} left - Subarray
-   * @param {array} right - Subarray
-   * @returns {array} - Sorted array
+   * @param {array} left - Subarray.
+   * @param {array} right - Subarray.
+   * @returns {array} - Sorted array.
    */
   function merge (left, right) {
     var result = []
@@ -374,10 +378,10 @@
   }
 
   /**
-   * Split array to subarrays and handle merge sort
+   * Split array to subarrays and handle merge sort.
    *
-   * @param {array} items - Array of arrays [[dayOfBirthday, monthOfBirthday], username]
-   * returns {array} - Sorted array
+   * @param {array} items - Array of arrays [[dayOfBirthday, monthOfBirthday], username].
+   * returns {array} - Sorted array.
    */
   function mergeSort (items) {
     if (items.length < 2) {
@@ -392,17 +396,17 @@
   }
 
   /**
-   * Add element with date today, call merge sort and shift sorted array in order of date today
+   * Sort the elements (strings containing dates) of the specified array by today.
    *
-   * @param {array} sortedUserArray - Sorted by month, day array of arrays [[dayOfBirthday, monthOfBirthday], username]
-   * @returns {array} - Started from date after today sortedUserArray
+   * @param {array} userArray - Sorted by month, day array of arrays [[dayOfBirthday, monthOfBirthday], username].
+   * @returns {array} - Started from current date in userArray.
    */
-  function sortedByToday (userArray) {
-    const dateToday = [moment().format('DD-MM').split('-')]
-    userArray.push(dateToday)
+  function sortedByCurrentDate (userArray) {
+    const currentDate = [moment().format('DD-MM').split('-')]
+    userArray.push(currentDate)
 
     const result = mergeSort(userArray)
-    const index = result.indexOf(dateToday)
+    const index = result.indexOf(currentDate)
     const sortedSearch = result.slice(index + 1).concat(result.slice(0, index))
 
     return sortedSearch
@@ -512,7 +516,7 @@
         .filter(user => isValidDate(user.dateOfBirth))
         .map(user => [user.dateOfBirth.split('.').slice(0, 3), user.name])
 
-      var result = sortedByToday(userArray)
+      var result = sortedByCurrentDate(userArray)
 
       if (result.length === 0) {
         msg.send('Oops... No results.')
