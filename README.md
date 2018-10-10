@@ -10,6 +10,7 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 
 ## Features
 
+* Asks freshmen to specify their date birth and reminds them about it if they ignore this request for some reason.
 * Fetches a random GIF using the `thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday` search query before writing a birthday message to a birthday boy/girl. The query (called "search term" in the Tenor terminology) is configurable via the `TENOR_SEARCH_TERM`environment variable. See the set of images associated with the search term used by default [here](https://tenor.com/search/thesimpsonsbirthday-futuramabirthday-rickandmortybirthday-tmntbirthday-harrypotterbirthday).
 * Writes birthday messages to `#general`.
 * Reminds users of the upcoming birthdays one day and a few days in advance. It's possible to specify how long before the event occurs the reminder should be triggered.
@@ -20,7 +21,8 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 
 ## Prerequisites
 
-The bot has to have `view-full-other-user-info` permission.
+* The bot must be in the channel specified via the `BIRTHDAY_LOGGING_CHANNEL` environment variable.
+* The bot has to have `view-full-other-user-info` permission.
 
 ## Installation
 
@@ -51,6 +53,7 @@ The script can be configured via the following environment variables (called par
 | `CREATE_BIRTHDAY_CHANNELS` | Specifies whether to create the birthday channels for the purpose of discussing presents for birthday boys/girls. All the users are invited to the channel except the birthday boy/girl. | false |
 | `BIRTHDAY_CHANNEL_MESSAGE` | Allows changing the message written in the birthday channel. | `@%username% is having a birthday soon, so let's discuss a present.` |
 | `BIRTHDAY_CHANNEL_BLACKLIST` | A comma separated list of the users which won't be invited to the birthday channel when it's created. | |
+| `BIRTHDAY_LOGGING_CHANNEL` | Allows specifying the name of the channel which is used for logging the events related to birth dates. The bot must be in the channel (see the [Prerequisites](#prerequisites) sections). | hr |
 
 ## Example Interaction
 

@@ -27,9 +27,11 @@
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
   const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
+  const BIRTHDAY_LOGGING_CHANNEL = process.env.BIRTHDAY_LOGGING_CHANNEL || 'hr'
   const CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
 
   const MSG_PERMISSION_DENIED = 'Permission denied.'
+  const MSG_INVALID_DATE = 'Invalid date format. Try again.'
 
   // Here are the INPUT format strings which are suitable for the following cases:
   // * "DD.MM.YYYY", "D.M.YYYY"
@@ -411,7 +413,17 @@
     return sortedSearch
   }
 
-  module.exports = function (robot) {
+  module.exports = async (robot) => {
+    // Checking if the bot is in the channel specified via the BIRTHDAY_LOGGING_CHANNEL environment variable.
+    const botChannels = await robot.adapter.api.get('channels.list.joined')
+    const botGroups = await robot.adapter.api.get('groups.list')
+    const chExists = botChannels.channels.filter(item => item.name === BIRTHDAY_LOGGING_CHANNEL).length
+    const grExists = botGroups.groups.filter(item => item.name === BIRTHDAY_LOGGING_CHANNEL).length
+    if (!chExists && !grExists) {
+      robot.logger.error(`Hubot is not in the group or channel named '${BIRTHDAY_LOGGING_CHANNEL}'`)
+      return
+    }
+
     const regExpUsername = new RegExp(/(?:@?(.+))/)
     const regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/)
     const regExpShortDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2]))\b/)
@@ -427,6 +439,52 @@
       robot.logger.error('TENOR_API_KEY is a mandatory parameter, however it\'s not specified.')
       return
     }
+
+    /**
+     * Detect the birthdayless users and remind
+     * * the users of the need for specifying their birth date;
+     * * everyone in the channel specified via BIRTHDAY_LOGGING_CHANNEL that there are forgetful users.
+     *
+     * @param {Robot} robot - Hubot instance.
+     * @return {void}
+     */
+    const detectBirthdaylessUsers = robot => {
+      const usersWithoutBirthday = Object.values(robot.brain.data.users).filter(user => !user.dateOfBirth)
+      for (const user of usersWithoutBirthday) {
+        robot.adapter.sendDirect({ user: { name: user.name } }, 'Hmm... \nIt looks like you forgot to set the date of birth. \nPlease enter it (DD.MM.YYYY).')
+      }
+      const userList = usersWithoutBirthday.map(user => ` @${user.name} `)
+      if (userList.length) {
+        robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `There are the users who did not set the date of birth:\n${userList.join('\n')}`)
+      }
+    }
+
+    robot.enter(msg => {
+      if (msg.message.user.roomID === 'GENERAL') {
+        const brain = robot.brain.data.users
+        const username = msg.message.user.name
+        const user = Object.values(brain).filter(item => item.name === username).shift()
+        if (!user.dateOfBirth) {
+          robot.adapter.sendDirect({ user: { name: user.name } }, 'Welcome to WIS Software! :tada:\nEmm... where was I?\nOh! Please, enter your date birth (DD.MM.YYYY).')
+        }
+      }
+    })
+
+    robot.respond(regExpDate, msg => {
+      const username = msg.message.user.name
+      const user = robot.brain.userForName(username)
+      const date = msg.match[1]
+
+      if (!user.dateOfBirth) {
+        if (isValidDate(date)) {
+          user.dateOfBirth = date
+          msg.send('I memorized you birthday, well done! :wink:')
+          robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `All right, @${user.name}'s birthday was specified!`)
+        } else {
+          msg.send(MSG_INVALID_DATE)
+        }
+      }
+    })
 
     // Link together the specified birthday and user and store the link in the brain.
     robot.respond(routes.set, async (msg) => {
@@ -552,6 +610,10 @@
 
     if (ANNOUNCER_CRON_STRING) {
       schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => removeExpiredBirthdayChannels(robot))
+    }
+
+    if (ANNOUNCER_CRON_STRING) {
+      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => detectBirthdaylessUsers(robot))
     }
   }
 }).call(this)
