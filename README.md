@@ -55,13 +55,13 @@ The script can be configured via the following environment variables (called par
 ## Example Interaction
 
 ```
-some.user >> @hubot birthday set matt 15/02/1954
+some.user >> @hubot birthday set matt 15.02.1954
 hubot >> Saving matt's birthday.
-some.user >> @hubot birthday set homer 12/05/1956
+some.user >> @hubot birthday set homer 12.05.1956
 hubot >> Saving homer's birthday.
 some.user >> @hubot birthdays list
-hubot >> homer was born on 12/05/1956
-hubot >> matt was born on 15/02/1954
+hubot >> homer was born on 12.05.1956
+hubot >> matt was born on 15.02.1954
 ```
 
 ## Known issues
