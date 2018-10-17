@@ -50,6 +50,13 @@
   const QUOTES_PATH = path.join(__dirname, '/quotes.txt')
   const QUOTES = fs.readFileSync(QUOTES_PATH, 'utf8').toString().split('\n')
 
+  const sorting = (a, b, format) => {
+    const first = moment(a, format)
+    const second = moment(b, format)
+
+    return first.unix() - second.unix()
+  }
+
   /**
    * Create a channel and invite all the users to it except the one specified via username.
    *
@@ -317,73 +324,6 @@
     }
   }
 
-  /**
-   * Compare subarrays by month, day and then merge them.
-   *
-   * @param {array} left - Subarray.
-   * @param {array} right - Subarray.
-   * @returns {array} - Sorted array.
-   */
-  function merge (left, right) {
-    var result = []
-    var indexLeft = 0
-    var indexRight = 0
-
-    while (indexLeft < left.length && indexRight < right.length) {
-      var montLeft = parseInt(left[indexLeft][0][1])
-      var monthRight = parseInt(right[indexRight][0][1])
-      var dayLeft = parseInt(left[indexLeft][0][0])
-      var dayRight = parseInt(right[indexRight][0][0])
-
-      if (montLeft < monthRight) {
-        result.push(left[indexLeft++])
-      } else if (montLeft > monthRight) {
-        result.push(right[indexRight++])
-      } else if (dayLeft < dayRight) {
-        result.push(left[indexLeft++])
-      } else {
-        result.push(right[indexRight++])
-      }
-    }
-
-    return result.concat(left.slice(indexLeft)).concat(right.slice(indexRight))
-  }
-
-  /**
-   * Split array to subarrays and handle merge sort.
-   *
-   * @param {array} items - Array of arrays [[dayOfBirthday, monthOfBirthday], username].
-   * returns {array} - Sorted array.
-   */
-  function mergeSort (items) {
-    if (items.length < 2) {
-      return items
-    }
-
-    const middle = Math.floor(items.length / 2)
-    const left = items.slice(0, middle)
-    const right = items.slice(middle)
-
-    return merge(mergeSort(left), mergeSort(right))
-  }
-
-  /**
-   * Sort the elements (strings containing dates) of the specified array by today.
-   *
-   * @param {array} userArray - Sorted by month, day array of arrays [[dayOfBirthday, monthOfBirthday], username].
-   * @returns {array} - Started from current date in userArray.
-   */
-  function sortedByCurrentDate (userArray) {
-    const currentDate = [moment().format('DD-MM').split('-')]
-    userArray.push(currentDate)
-
-    const result = mergeSort(userArray)
-    const index = result.indexOf(currentDate)
-    const sortedSearch = result.slice(index + 1).concat(result.slice(0, index))
-
-    return sortedSearch
-  }
-
   module.exports = async (robot) => {
     // Checking if the bot is in the channel specified via the BIRTHDAY_LOGGING_CHANNEL environment variable.
     const botChannels = await robot.adapter.api.get('channels.list.joined')
@@ -570,20 +510,28 @@
     // Print sorted users birthdays.
     robot.respond(routes.list, function (msg) {
       let message
-      let userArray
 
-      userArray = Object.values(robot.brain.data.users)
+      message = Object.values(robot.brain.data.users)
         .filter(user => routines.isValidDate(user.dateOfBirth, DATE_FORMAT))
-        .map(user => [user.dateOfBirth.split('.').slice(0, 3), user.name])
+        .map(user => {
+          const thisYear = moment().year()
+          const date = moment(user.dateOfBirth, DATE_FORMAT).year(thisYear)
+          const sortedDate = date.unix() >= moment().unix()
+            ? date.format(`DD.MM.${date.year() - 1}`) : date.format(`DD.MM.${date.year()}`)
 
-      var result = sortedByCurrentDate(userArray)
+          return {
+            name: user.name,
+            dateOfBirth: user.dateOfBirth,
+            sortedDate: sortedDate
+          }
+        })
+        .sort((a, b) => sorting(a.sortedDate, b.sortedDate, 'DD.MM.YYYY'))
+        .map(user => ` @${user.name} was born on ${moment(user.dateOfBirth, DATE_FORMAT).format(OUTPUT_DATE_FORMAT)}`)
 
-      if (result.length === 0) {
+      if (!message.length) {
         msg.send('Oops... No results.')
         return
       }
-
-      message = result.map(item => ` @${item[1]} was born on ${moment(item[0].join('.'), DATE_FORMAT).format(OUTPUT_DATE_FORMAT)}`)
 
       msg.send(`*Birthdays list*\n${message.join('\n')}`)
     })
