@@ -418,15 +418,44 @@
      * @param {Robot} robot - Hubot instance.
      * @return {void}
      */
-    const detectBirthdaylessUsers = robot => {
-      const usersWithoutBirthday = Object.values(robot.brain.data.users).filter(user => !user.dateOfBirth)
-      for (const user of usersWithoutBirthday) {
+    const detectBirthdaylessUsers = async robot => {
+      let usersWithoutBirthday = Object.values(robot.brain.data.users)
+        .filter(user => !user.dateOfBirth)
+      let formattedArray = []
+
+      for (const i in usersWithoutBirthday) {
+        const user = usersWithoutBirthday[i]
+        const valid = await userExists(robot, user)
+        if (valid) formattedArray.push(user)
+      }
+
+      for (const user of formattedArray) {
         robot.adapter.sendDirect({ user: { name: user.name } }, 'Hmm... \nIt looks like you forgot to set the date of birth. \nPlease enter it (DD.MM.YYYY).')
       }
-      const userList = usersWithoutBirthday.map(user => ` @${user.name} `)
+      const userList = formattedArray.map(user => ` @${user.name} `)
       if (userList.length) {
         robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `There are the users who did not set the date of birth:\n${userList.join('\n')}`)
       }
+    }
+
+    /**
+     * Check if the specified user exists.
+     *
+     * @param {Robot} robot - Hubot instance.
+     * @param {User} user - User instance.
+     * @returns {boolean}
+     */
+    const userExists = async (robot, user) => {
+      const list = await robot.adapter.api.get('users.list')
+
+      for (const item of list.users) {
+        if (item._id === user.id) {
+          console.log('WTF??? : ' + item.name + ' _ ' + JSON.stringify(item))
+          return true
+        }
+      }
+
+      return false
     }
 
     robot.enter(msg => {
