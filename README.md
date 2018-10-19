@@ -54,6 +54,7 @@ The script can be configured via the following environment variables (called par
 | `BIRTHDAY_CHANNEL_MESSAGE` | Allows changing the message written in the birthday channel. | `@%username% is having a birthday soon, so let's discuss a present.` |
 | `BIRTHDAY_CHANNEL_BLACKLIST` | A comma separated list of the users which won't be invited to the birthday channel when it's created. | |
 | `BIRTHDAY_LOGGING_CHANNEL` | Allows specifying the name of the channel which is used for logging the events related to birth dates. The bot must be in the channel (see the [Prerequisites](#prerequisites) sections). | hr |
+| `COMPANY_NAME` | Allows specifying the company name which is used in the welcome message. | WIS Software |
 
 ## Example Interaction
 
