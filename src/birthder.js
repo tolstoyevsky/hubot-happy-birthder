@@ -29,6 +29,7 @@
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
   const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
   const BIRTHDAY_LOGGING_CHANNEL = process.env.BIRTHDAY_LOGGING_CHANNEL || 'hr'
+  const COMPANY_NAME = process.env.COMPANY_NAME || 'WIS Software'
   const CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
 
   const MSG_PERMISSION_DENIED = 'Permission denied.'
@@ -464,7 +465,7 @@
         const username = msg.message.user.name
         const user = Object.values(brain).filter(item => item.name === username).shift()
         if (!user.dateOfBirth) {
-          robot.adapter.sendDirect({ user: { name: user.name } }, 'Welcome to WIS Software! :tada:\nEmm... where was I?\nOh! Please, enter your date birth (DD.MM.YYYY).')
+          robot.adapter.sendDirect({ user: { name: user.name } }, `Welcome to ${COMPANY_NAME}! :tada:\nEmm... where was I?\nOh! Please, enter your date birth (DD.MM.YYYY).`)
         }
       }
     })
