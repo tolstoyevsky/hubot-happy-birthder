@@ -1,7 +1,7 @@
 {
   "name": "hubot-happy-birthder",
   "description": "Hubot script for writing birthday messages to users",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "author": "6r1d",
   "license": "Apache-2.0",
   "keywords": [
