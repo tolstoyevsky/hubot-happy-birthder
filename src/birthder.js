@@ -22,8 +22,6 @@
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
   const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday'
-  const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || '0 0 7 * * *'
-  const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || '0 0 7 * * *'
   const BIRTHDAY_CHANNEL_MESSAGE = (process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.').split('|')
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
@@ -31,6 +29,7 @@
   const BIRTHDAY_LOGGING_CHANNEL = process.env.BIRTHDAY_LOGGING_CHANNEL || 'hr'
   const COMPANY_NAME = process.env.COMPANY_NAME || 'WIS Software'
   const CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
+  const HAPPY_REMINDER_SCHEDULER = process.env.HAPPY_REMINDER_SCHEDULER || '0 0 7 * * *'
   const NUMBER_OF_DAYS_IN_ADVANCE = parseInt(process.env.NUMBER_OF_DAYS_IN_ADVANCE, 10) || 7
 
   const MSG_PERMISSION_DENIED = 'Permission denied.'
@@ -556,26 +555,26 @@
     })
 
     // Check regularly if today is someone's birthday, write birthday messages to the general channel.
-    if (BIRTHDAY_CRON_STRING) {
-      schedule.scheduleJob(BIRTHDAY_CRON_STRING, () => sendCongratulations(robot))
+    if (HAPPY_REMINDER_SCHEDULER) {
+      schedule.scheduleJob(HAPPY_REMINDER_SCHEDULER, () => sendCongratulations(robot))
     }
 
     // Send reminders of the upcoming birthdays to the users (except ones whose birthday it is).
 
-    if (ANNOUNCER_CRON_STRING) {
-      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot, NUMBER_OF_DAYS_IN_ADVANCE, 'days'))
+    if (HAPPY_REMINDER_SCHEDULER) {
+      schedule.scheduleJob(HAPPY_REMINDER_SCHEDULER, () => sendReminders(robot, NUMBER_OF_DAYS_IN_ADVANCE, 'days'))
     }
 
-    if (ANNOUNCER_CRON_STRING) {
-      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => sendReminders(robot, 1, 'day'))
+    if (HAPPY_REMINDER_SCHEDULER) {
+      schedule.scheduleJob(HAPPY_REMINDER_SCHEDULER, () => sendReminders(robot, 1, 'day'))
     }
 
-    if (ANNOUNCER_CRON_STRING) {
-      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => removeExpiredBirthdayChannels(robot))
+    if (HAPPY_REMINDER_SCHEDULER) {
+      schedule.scheduleJob(HAPPY_REMINDER_SCHEDULER, () => removeExpiredBirthdayChannels(robot))
     }
 
-    if (ANNOUNCER_CRON_STRING) {
-      schedule.scheduleJob(ANNOUNCER_CRON_STRING, () => detectBirthdaylessUsers(robot))
+    if (HAPPY_REMINDER_SCHEDULER) {
+      schedule.scheduleJob(HAPPY_REMINDER_SCHEDULER, () => detectBirthdaylessUsers(robot))
     }
   }
 }).call(this)
