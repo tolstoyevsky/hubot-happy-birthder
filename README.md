@@ -49,12 +49,12 @@ The script can be configured via the following environment variables (called par
 | `TENOR_SEARCH_TERM`                 | Helps to find GIFs associated with the specified term. | See [Features](#features) |
 | `ANNOUNCER_CRON_STRING`             | Allows specifying the frequency with which the script checks for nearest birthdays. The value of this parameter must follow the [Cron Format](https://github.com/node-schedule/node-schedule#cron-style-scheduling). | `0 0 7 * * *` |
 | `BIRTHDAY_CRON_STRING`              | Allows specifying the frequency with which the script writes birthday messages to users. The value of this parameter must follow the [Cron Format](https://github.com/node-schedule/node-schedule#cron-style-scheduling). | `0 0 7 * * *` |
-| `BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT`  | Sets (in days) how long before the event occurs the reminder will be triggered. | 7 |
 | `CREATE_BIRTHDAY_CHANNELS` | Specifies whether to create the birthday channels for the purpose of discussing presents for birthday boys/girls. All the users are invited to the channel except the birthday boy/girl. | false |
 | `BIRTHDAY_CHANNEL_MESSAGE` | Allows changing the message written in the birthday channel. | `@%username% is having a birthday soon, so let's discuss a present.` |
 | `BIRTHDAY_CHANNEL_BLACKLIST` | A comma separated list of the users which won't be invited to the birthday channel when it's created. | |
 | `BIRTHDAY_LOGGING_CHANNEL` | Allows specifying the name of the channel which is used for logging the events related to birth dates. The bot must be in the channel (see the [Prerequisites](#prerequisites) sections). | hr |
 | `COMPANY_NAME` | Allows specifying the company name which is used in the welcome message. | WIS Software |
+| `NUMBER_OF_DAYS_IN_ADVANCE`  | Sets (in days) how long before the event occurs the reminder will be triggered. | 7 |
 
 ## Example Interaction
 
