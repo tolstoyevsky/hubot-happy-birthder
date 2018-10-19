@@ -24,7 +24,7 @@
   const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday'
   const BIRTHDAY_CRON_STRING = process.env.BIRTHDAY_CRON_STRING || '0 0 7 * * *'
   const ANNOUNCER_CRON_STRING = process.env.ANNOUNCER_CRON_STRING || '0 0 7 * * *'
-  const BIRTHDAY_CHANNEL_MESSAGE = process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.'
+  const BIRTHDAY_CHANNEL_MESSAGE = (process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.').split('|')
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
   const BIRTHDAY_CHANNEL_TTL = parseInt(process.env.BIRTHDAY_CHANNEL_TTL, 10) || 3
@@ -51,11 +51,29 @@
   const QUOTES_PATH = path.join(__dirname, '/quotes.txt')
   const QUOTES = fs.readFileSync(QUOTES_PATH, 'utf8').toString().split('\n')
 
+  let BIRTHDAY_CHANNEL_MESSAGE_INDEX = 0
+
   const sorting = (a, b, format) => {
     const first = moment(a, format)
     const second = moment(b, format)
 
     return first.unix() - second.unix()
+  }
+
+  /**
+   * Get the BIRTHDAY_CHANNEL_MESSAGE list and switches the status to the next message.
+   *
+   * @returns {String}
+   */
+  function getBirthdayChannelMessage () {
+    const result = BIRTHDAY_CHANNEL_MESSAGE[BIRTHDAY_CHANNEL_MESSAGE_INDEX]
+
+    BIRTHDAY_CHANNEL_MESSAGE_INDEX++
+    if (BIRTHDAY_CHANNEL_MESSAGE_INDEX >= BIRTHDAY_CHANNEL_MESSAGE.length) {
+      BIRTHDAY_CHANNEL_MESSAGE_INDEX = 0
+    }
+
+    return result
   }
 
   /**
@@ -66,7 +84,7 @@
    * @returns {Void}
    */
   const createBirthdayChannel = async (robot, username) => {
-    const message = BIRTHDAY_CHANNEL_MESSAGE
+    const message = getBirthdayChannelMessage()
       .replace(/%username%/g, username)
     const now = moment()
     const dayMonth = now.format('DD.MM')
