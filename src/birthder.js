@@ -435,7 +435,11 @@
       }
       const userList = formattedArray.map(user => ` @${user.name} `)
       if (userList.length) {
-        robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `There are the users who did not set the date of birth:\n${userList.join('\n')}`)
+        if (userList.length > 1) {
+          robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `There are the users who did not set the date of birth:\n${userList.join('\n')}`)
+        } else {
+          robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `${userList[0]} did not set the date of birth.`)
+        }
       }
     }
 
