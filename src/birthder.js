@@ -566,7 +566,6 @@
     // Print sorted users birthdays.
     robot.respond(routes.list, function (msg) {
       let message
-      let rich = {}
       let userArray
 
       userArray = Object.values(robot.brain.data.users)
@@ -580,17 +579,9 @@
         return
       }
 
-      message = result.map(item => `@${item[1]} was born on ${moment(item[0].join('.'), DATE_FORMAT).format(OUTPUT_DATE_FORMAT)}`)
+      message = result.map(item => ` @${item[1]} was born on ${moment(item[0].join('.'), DATE_FORMAT).format(OUTPUT_DATE_FORMAT)}`)
 
-      rich.attachments = [
-        {
-          color: '#0000DD',
-          title: 'Birthdays list',
-          text: message.join('\n')
-        }
-      ]
-
-      msg.send(rich)
+      msg.send(`*Birthdays list*\n${message.join('\n')}`)
     })
 
     // Check regularly if today is someone's birthday, write birthday messages to the general channel.
