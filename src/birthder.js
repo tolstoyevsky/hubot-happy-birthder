@@ -476,7 +476,7 @@
       const date = msg.match[1]
 
       if (!user.dateOfBirth) {
-        if (routines.isValidDate(date)) {
+        if (routines.isValidDate(date, DATE_FORMAT)) {
           user.dateOfBirth = date
           msg.send('I memorized you birthday, well done! :wink:')
           robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `All right, @${user.name}'s birthday was specified!`)
