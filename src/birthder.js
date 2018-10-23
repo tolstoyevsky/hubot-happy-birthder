@@ -5,12 +5,16 @@
 //   None
 //
 // Commands:
-//   hubot birthdays list - shows a list of users and their birthdays
-//   hubot birthday set <username> <date>.<month>.<year> - sets a birthday for the user (privileged: admins only)
-//   hubot birthdays on <date>.<month> - shows a list of users with a set birthday date
-//   hubot birthday delete <username> - deletes birthday for the user (privileged: admins only)
-//   hubot fwd set <username> <date>.<month>.<year> - sets a first working day for the user (privileged: admins only)
-//   hubot fwd list - shows a list of users and their first working days
+//   begin group Happy Birthder
+//    hubot birthdays list - shows a list of users and their birthdays
+//    hubot birthdays on <date>.<month> - shows a list of users with a set birthday date
+//    hubot fwd list - shows a list of users and their first working days
+//    begin admin
+//      hubot birthday set <username> <date>.<month>.<year> - sets a birthday for the user
+//      hubot birthday delete <username> - deletes birthday for the user
+//      hubot fwd set <username> <date>.<month>.<year> - sets a first working day for the user
+//    end admin
+//   end group
 //
 
 (function () {
