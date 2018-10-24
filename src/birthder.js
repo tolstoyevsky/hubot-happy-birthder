@@ -28,6 +28,7 @@
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT = parseInt(process.env.BIRTHDAY_ANNOUNCEMENT_BEFORE_CNT, 10) || 7
   const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
+  const BIRTHDAY_CHANNEL_TTL = parseInt(process.env.BIRTHDAY_CHANNEL_TTL, 10) || 3
   const BIRTHDAY_LOGGING_CHANNEL = process.env.BIRTHDAY_LOGGING_CHANNEL || 'hr'
   const COMPANY_NAME = process.env.COMPANY_NAME || 'WIS Software'
   const CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
@@ -240,7 +241,7 @@
     let users
     let channelName
 
-    targetDay.add(-1, 'day')
+    targetDay.add(-BIRTHDAY_CHANNEL_TTL, 'day')
     users = findUsersBornOnDate(targetDay, robot.brain.data.users)
 
     if (users.length) {
