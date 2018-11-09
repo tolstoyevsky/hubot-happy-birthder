@@ -349,8 +349,8 @@
     }
 
     const regExpUsername = new RegExp(/(?:@?(.+))/)
-    const regExpDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2])\.([\d]{4}))\b/)
-    const regExpShortDate = new RegExp(/((0?[1-9]|[12][0-9]|3[01])\.(0?[1-9]|1[0-2]))\b/)
+    const regExpDate = new RegExp(/((\d{1,2})\.(\d{1,2})\.(\d{4}))\b/)
+    const regExpShortDate = new RegExp(/((\d{1,2})\.(\d{1,2}))\b/)
 
     const routes = {
       set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
@@ -458,6 +458,11 @@
       name = msg.match[2].trim()
       date = msg.match[3]
       users = robot.brain.usersForFuzzyName(name)
+
+      if (!routines.isValidDate(date, DATE_FORMAT)) {
+        msg.send(MSG_INVALID_DATE)
+        return
+      }
 
       if (users.length === 1) {
         user = users[0]
