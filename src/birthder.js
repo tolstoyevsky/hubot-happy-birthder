@@ -289,14 +289,10 @@
    */
   async function sendReminders (robot, amountOfTime, unitOfTime) {
     let targetDay = moment()
-    let userNames
     let users
-    let message
 
     targetDay.add(amountOfTime, unitOfTime)
     users = findUsersBornOnDate(targetDay, robot.brain.data.users)
-    userNames = users.map(user => user.name)
-    message = formReminderMessage(users, targetDay, amountOfTime)
 
     if (users.length > 0) {
       if (CREATE_BIRTHDAY_CHANNELS) {
@@ -307,15 +303,14 @@
         }
       }
 
-      for (let user of Object.values(robot.brain.data.users)) {
-        if (userNames.indexOf(user.name) === -1) {
-          robot.adapter.sendDirect({ user: { name: user.name } }, message)
-        } else if (users.length > 1) {
-          const usersCopy = users.slice(0)
-          usersCopy.splice(usersCopy.indexOf(user), 1)
-          message = formReminderMessage(usersCopy, targetDay, amountOfTime)
-          robot.adapter.sendDirect({ user: { name: user.name } }, message)
+      const allUsers = Object.values(robot.brain.data.users)
+      for (let user of allUsers) {
+        const filteredUsers = users.filter(item => item.name !== user.name)
+        if (!filteredUsers.length) {
+          continue
         }
+        const message = formReminderMessage(filteredUsers, targetDay, amountOfTime)
+        robot.adapter.sendDirect({ user: { name: user.name } }, message)
       }
     }
   }
