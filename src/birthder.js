@@ -20,6 +20,7 @@
   const schedule = require('node-schedule')
 
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
+  const TENOR_BLACKLIST = process.env.TENOR_BLACKLIST ? process.env.TENOR_BLACKLIST.split(',') : ['641ee5344bdc3f9f4d3ef52344dfe6bd']
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
   const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday'
   const BIRTHDAY_CHANNEL_MESSAGE = (process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.').split('|')
@@ -128,10 +129,30 @@
    * @returns {string} - Image URL.
    */
   function selectTenorImageUrl (response) {
-    let items = response.results
-    let randomItems = items[Math.floor(Math.random() * items.length)]
+    const items = response.results
 
-    return randomItems.media[0].gif.url
+    const filteredItems = items.filter(item => {
+      const re = /^(https?[:]\/\/media.tenor.com\/images\/([0-9a-z]+)\/tenor.gif)$/i
+      const match = item.media[0].gif.url.match(re)
+
+      if (!match) {
+        return false
+      }
+
+      if (TENOR_BLACKLIST.includes(match[2])) {
+        console.log('Tenor returned the image from the blacklist specified via TENOR_BLACKLIST. Retrying...')
+        return false
+      }
+
+      return true
+    })
+
+    if (!filteredItems.length) {
+      return ''
+    }
+
+    return filteredItems[Math.floor(Math.random() * filteredItems.length)]
+      .media[0].gif.url
   }
 
   /**
@@ -185,8 +206,17 @@
         return response
       })
 
-    response = await requestTenor()
-    imageUrl = selectTenorImageUrl(await response.json())
+    let repeat = true
+    while (repeat) {
+      response = await requestTenor()
+      imageUrl = selectTenorImageUrl(await response.json())
+
+      if (imageUrl) {
+        repeat = false
+      } else {
+        console.log('No images returned. New Tenor API request')
+      }
+    }
 
     return imageUrl
   }

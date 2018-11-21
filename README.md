@@ -45,6 +45,7 @@ The script can be configured via the following environment variables (called par
 | Parameter                           | Description | Default |
 |-------------------------------------|-------------|---------|
 | `TENOR_API_KEY`                     | Сlient key for privileged API access. This is the only **mandatory** parameter. | |
+| `TENOR_BLACKLIST` | A comma separated list of the GIFs ids which will be excluded when choosing one from the list returned by Tenor. If the script randomly chooses a GIF from the response which belongs to the blacklist, the script sends one more request to Tenor. | [641ee5344bdc3f9f4d3ef52344dfe6bd](https://media.tenor.com/images/641ee5344bdc3f9f4d3ef52344dfe6bd/tenor.gif) |
 | `TENOR_IMG_LIMIT`                   | Fetches up to the specified number of result, but not more than **50**. | 50 |
 | `TENOR_SEARCH_TERM`                 | Helps to find GIFs associated with the specified term. | See [Features](#features) |
 | `CREATE_BIRTHDAY_CHANNELS` | Specifies whether to create the birthday channels for the purpose of discussing presents for birthday boys/girls. All the users are invited to the channel except the birthday boy/girl. | false |
