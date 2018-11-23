@@ -449,6 +449,29 @@
       return false
     }
 
+    /**
+     * Look for users with specified username and form an array of them.
+     *
+     * @param {Robot} robot - Hubot instance.
+     * @param {String} user - Username.
+     * @returns {Array}
+     */
+    const usersForName = async (robot, user) => {
+      const result = []
+      const lowerName = user.name.toLowerCase()
+
+      for (const i in robot.brain.data.users) {
+        const user = robot.brain.data.users[i]
+        if (user.name != null && user.name.toString().toLowerCase() === lowerName) {
+          if (await userExists(robot, user)) {
+            result.push(user)
+          }
+        }
+      }
+
+      return result
+    }
+
     robot.enter(msg => {
       if (msg.message.user.roomID === 'GENERAL') {
         const brain = robot.brain.data.users
@@ -551,7 +574,8 @@
         return
       }
 
-      for (const u of robot.brain.usersForFuzzyName(name)) {
+      const activeUsers = await usersForName(robot, name)
+      for (const u of activeUsers) {
         if (await isUserActive(robot, u)) {
           users.push(u)
         }
