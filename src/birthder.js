@@ -105,6 +105,23 @@
   }
 
   /**
+   * Check if the specified user is active.
+   *
+   * @param {Robot} robot - Hubot instance.
+   * @param {string} user - User instance.
+   * @returns {boolean}
+   */
+  async function isUserActive (robot, user) {
+    // It's necessary to get the users list instead of the specified user,
+    // because for some reason it causes the error which is not possible
+    // (at least superficially) to catch.
+    // TODO: solve the issue.
+    const list = await robot.adapter.api.get('users.list')
+    const findUser = list.users.find(item => item._id === user.id)
+    return findUser && findUser.active
+  }
+
+  /**
    * Check if the bot is in the birthday channel.
    *
    * @param {Robot} robot - Hubot instance.
@@ -265,11 +282,15 @@
     }
 
     let targetDay = moment()
-    let users
+    let users = []
     let channelName
 
     targetDay.add(-BIRTHDAY_CHANNEL_TTL, 'day')
-    users = findUsersBornOnDate(targetDay, robot.brain.data.users)
+    for (const bdayUser of findUsersBornOnDate(targetDay, robot.brain.data.users)) {
+      if (await isUserActive(robot, bdayUser)) {
+        users.push(bdayUser)
+      }
+    }
 
     if (users.length) {
       for (let user of users) {
@@ -292,10 +313,15 @@
    */
   async function sendReminders (robot, amountOfTime, unitOfTime) {
     let targetDay = moment()
-    let users
+    let users = []
 
     targetDay.add(amountOfTime, unitOfTime)
-    users = findUsersBornOnDate(targetDay, robot.brain.data.users)
+
+    for (const bdayUser of findUsersBornOnDate(targetDay, robot.brain.data.users)) {
+      if (await isUserActive(robot, bdayUser)) {
+        users.push(bdayUser)
+      }
+    }
 
     if (users.length > 0) {
       if (CREATE_BIRTHDAY_CHANNELS) {
@@ -323,8 +349,13 @@
    *
    * @param {Object} robot - Hubot instance.
    */
-  function sendCongratulations (robot) {
-    let users = findUsersBornOnDate(moment(), robot.brain.data.users)
+  async function sendCongratulations (robot) {
+    let users = []
+    for (const bdayUser of findUsersBornOnDate(moment(), robot.brain.data.users)) {
+      if (await isUserActive(robot, bdayUser)) {
+        users.push(bdayUser)
+      }
+    }
 
     if (users.length > 0) {
       let userNames = users.map(user => `@${user.name}`)
@@ -382,7 +413,7 @@
 
       for (const i in usersWithoutBirthday) {
         const user = usersWithoutBirthday[i]
-        const valid = await userExists(robot, user)
+        const valid = await userExists(robot, user) && await isUserActive(robot, user)
         if (valid) formattedArray.push(user)
       }
 
@@ -460,7 +491,13 @@
 
       name = msg.match[2].trim()
       date = msg.match[3]
-      users = robot.brain.usersForFuzzyName(name)
+      users = []
+
+      for (const u of robot.brain.usersForFuzzyName(name)) {
+        if (await isUserActive(robot, u)) {
+          users.push(u)
+        }
+      }
 
       if (!routines.isValidDate(date, DATE_FORMAT)) {
         msg.send(MSG_INVALID_DATE)
@@ -483,11 +520,16 @@
     robot.respond(routes.check, async (msg) => {
       let date
       let message
-      let users
+      let users = []
       let userNames
 
       date = msg.match[2]
-      users = findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users)
+
+      for (const u of findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users)) {
+        if (await isUserActive(robot, u)) {
+          users.push(u)
+        }
+      }
 
       if (users.length === 0) {
         return msg.send('Could not find any user with the specified birthday.')
@@ -503,14 +545,18 @@
     robot.respond(routes.delete, async (msg) => {
       let name = msg.match[2].trim()
       let user
-      let users
+      let users = []
 
       if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(MSG_PERMISSION_DENIED)
         return
       }
 
-      users = robot.brain.usersForFuzzyName(name)
+      for (const u of robot.brain.usersForFuzzyName(name)) {
+        if (await isUserActive(robot, u)) {
+          users.push(u)
+        }
+      }
 
       if (users.length === 1) {
         user = users[0]
@@ -529,10 +575,17 @@
     })
 
     // Print sorted users birthdays.
-    robot.respond(routes.list, function (msg) {
+    robot.respond(routes.list, async function (msg) {
       let message
 
-      message = Object.values(robot.brain.data.users)
+      const allUsers = []
+      for (const u of Object.values(robot.brain.data.users)) {
+        if (await isUserActive(robot, u)) {
+          allUsers.push(u)
+        }
+      }
+
+      message = allUsers
         .filter(user => routines.isValidDate(user.dateOfBirth, DATE_FORMAT))
         .map(user => {
           const thisYear = moment().year()
