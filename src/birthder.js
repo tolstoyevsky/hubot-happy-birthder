@@ -97,8 +97,8 @@
       name: channelName,
       members: users
     })
-    const userInstance = robot.brain.userForName(username)
-    userInstance.birthdayChannel = {
+    const userInstance = await usersForName(robot, username)
+    userInstance[0].birthdayChannel = {
       roomName: channelName
     }
     robot.messageRoom(channelName, message)
@@ -129,8 +129,8 @@
    * @returns {boolean}
    */
   const isBotInBirthdayChannel = async (robot, username) => {
-    const userInstance = robot.brain.userForName(username)
-    if (userInstance.birthdayChannel) {
+    const userInstance = await usersForName(robot, username)
+    if (userInstance[0].birthdayChannel) {
       return true
     }
     return false
@@ -271,6 +271,48 @@
   }
 
   /**
+   * Check if the specified user exists.
+   *
+   * @param {Robot} robot - Hubot instance.
+   * @param {User} user - User instance.
+   * @returns {boolean}
+   */
+  async function userExists (robot, user) {
+    const list = await robot.adapter.api.get('users.list')
+
+    for (const item of list.users) {
+      if (item._id === user.id) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * Look for users with specified username and form an array of them.
+   *
+   * @param {Robot} robot - Hubot instance.
+   * @param {String} username - Username.
+   * @returns {Array}
+   */
+  async function usersForName (robot, username) {
+    const result = []
+    const lowerName = username.toLowerCase()
+
+    for (const i in robot.brain.data.users) {
+      const user = robot.brain.data.users[i]
+      if (user.name != null && user.name.toString().toLowerCase() === lowerName) {
+        if (await userExists(robot, user)) {
+          result.push(user)
+        }
+      }
+    }
+
+    return result
+  }
+
+  /**
    * Find all the birthdays which were yesterday and remove the channels created for them.
    *
    * @param {Robot} robot - Hubot instance.
@@ -294,10 +336,13 @@
 
     if (users.length) {
       for (let user of users) {
+        if (!await userExists(robot, user)) {
+          continue
+        }
         if (await isBotInBirthdayChannel(robot, user.name)) {
-          const userInstance = robot.brain.userForName(user.name)
-          if (userInstance.birthdayChannel) {
-            channelName = userInstance.birthdayChannel.roomName
+          const userInstance = await usersForName(robot, user.name)
+          if (userInstance[0].birthdayChannel) {
+            channelName = userInstance[0].birthdayChannel.roomName
             await robot.adapter.api.post('groups.delete', { roomName: channelName })
             delete userInstance.birthdayChannel
           }
@@ -326,6 +371,9 @@
     if (users.length > 0) {
       if (CREATE_BIRTHDAY_CHANNELS) {
         for (let user of users) {
+          if (!await userExists(robot, user)) {
+            continue
+          }
           if (!await isBotInBirthdayChannel(robot, user.name)) {
             await createBirthdayChannel(robot, user.name)
           }
@@ -515,7 +563,8 @@
       date = msg.match[3]
       users = []
 
-      for (const u of robot.brain.usersForFuzzyName(name)) {
+      const activeUsers = await usersForName(robot, name)
+      for (const u of activeUsers) {
         if (await isUserActive(robot, u)) {
           users.push(u)
         }
@@ -540,14 +589,23 @@
 
     // Print the users names whose birthdays match the specified date.
     robot.respond(routes.check, async (msg) => {
+      let allUsers = {}
       let date
       let message
       let users = []
       let userNames
 
+      for (const i in robot.brain.data.users) {
+        const currentUser = robot.brain.data.users[i]
+
+        if (await userExists(robot, currentUser)) {
+          allUsers[i] = currentUser
+        }
+      }
+
       date = msg.match[2]
 
-      for (const u of findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users)) {
+      for (const u of findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), allUsers)) {
         if (await isUserActive(robot, u)) {
           users.push(u)
         }
@@ -603,7 +661,7 @@
 
       const allUsers = []
       for (const u of Object.values(robot.brain.data.users)) {
-        if (await isUserActive(robot, u)) {
+        if (await isUserActive(robot, u) && await userExists(robot, u)) {
           allUsers.push(u)
         }
       }
