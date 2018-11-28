@@ -22,7 +22,7 @@
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
   const TENOR_BLACKLIST = process.env.TENOR_BLACKLIST ? process.env.TENOR_BLACKLIST.split(',') : ['641ee5344bdc3f9f4d3ef52344dfe6bd']
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
-  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday'
+  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday,futuramabirthday,rickandmortybirthday,tmntbirthday,harrypotterbirthday'
   const BIRTHDAY_CHANNEL_MESSAGE = (process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.').split('|')
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
@@ -199,7 +199,9 @@
       .then(res => res.json())
       .then(async (res) => {
         const anonId = res.anon_id
-        const searchUrl = `https://api.tenor.com/v1/search?tag=${TENOR_SEARCH_TERM}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`
+        const tags = TENOR_SEARCH_TERM.split(',')
+        const chosenTag = tags[Math.floor(Math.random() * tags.length)]
+        const searchUrl = `https://api.tenor.com/v1/search?tag=${chosenTag}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`
 
         response = await retryFetch(searchUrl)
 
