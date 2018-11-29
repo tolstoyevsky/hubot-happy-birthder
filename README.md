@@ -11,7 +11,7 @@ Hubot script for writing birthday messages to users. It uses [Tenor](https://ten
 ## Features
 
 * Asks freshmen to specify their date birth and reminds them about it if they ignore this request for some reason.
-* Fetches a random GIF using the `thesimpsonsbirthday+futuramabirthday+rickandmortybirthday+tmntbirthday+harrypotterbirthday` search query before writing a birthday message to a birthday boy/girl. The query (called "search term" in the Tenor terminology) is configurable via the `TENOR_SEARCH_TERM`environment variable. See the set of images associated with the search term used by default [here](https://tenor.com/search/thesimpsonsbirthday-futuramabirthday-rickandmortybirthday-tmntbirthday-harrypotterbirthday).
+* Fetches a random GIF from [Tenor](https://tenor.com) before writing a birthday message to a birthday boy/girl. The `TENOR_SEARCH_TERM` environment variable stores a comma separated list of the tags which will be used when fetching GIFs. By default, the value of the variable is [thesimpsonsbirthday](https://tenor.com/search/thesimpsonsbirthday),[futuramabirthday](https://tenor.com/search/futuramabirthday),[rickandmortybirthday](https://tenor.com/search/rickandmortybirthday),[tmntbirthday](https://tenor.com/search/tmntbirthday),[harrypotterbirthday](https://tenor.com/search/harrypotterbirthday).
 * Writes birthday messages to `#general`.
 * Reminds users of the upcoming birthdays one day and a few days in advance. It's possible to specify how long before the event occurs the reminder should be triggered.
 * Provides fault tolerance:
@@ -47,7 +47,7 @@ The script can be configured via the following environment variables (called par
 | `TENOR_API_KEY`                     | Сlient key for privileged API access. This is the only **mandatory** parameter. | |
 | `TENOR_BLACKLIST` | A comma separated list of the GIFs ids which will be excluded when choosing one from the list returned by Tenor. If the script randomly chooses a GIF from the response which belongs to the blacklist, the script sends one more request to Tenor. | [641ee5344bdc3f9f4d3ef52344dfe6bd](https://media.tenor.com/images/641ee5344bdc3f9f4d3ef52344dfe6bd/tenor.gif) |
 | `TENOR_IMG_LIMIT`                   | Fetches up to the specified number of result, but not more than **50**. | 50 |
-| `TENOR_SEARCH_TERM`                 | Helps to find GIFs associated with the specified term. | See [Features](#features) |
+| `TENOR_SEARCH_TERM`                 | A comma separated list of tags which will be used when fetching GIFs from Tenor. | See [Features](#features) |
 | `CREATE_BIRTHDAY_CHANNELS` | Specifies whether to create the birthday channels for the purpose of discussing presents for birthday boys/girls. All the users are invited to the channel except the birthday boy/girl. | false |
 | `BIRTHDAY_CHANNEL_BLACKLIST` | A comma separated list of the users which won't be invited to the birthday channel when it's created. | |
 | `BIRTHDAY_CHANNEL_MESSAGE` | The messages separated by `\|` which are sent to the birthday channel one by one. | `@%username% is having a birthday soon, so let's discuss a present.` |
