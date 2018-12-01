@@ -14,7 +14,6 @@
 (function () {
   const fs = require('fs')
   const moment = require('moment')
-  const nFetch = require('node-fetch')
   const path = require('path')
   const routines = require('hubot-routines')
   const schedule = require('node-schedule')
@@ -167,35 +166,7 @@
 
     const tenorKeyUrl = `https://api.tenor.com/v1/anonid?key=${TENOR_API_KEY}`
 
-    const delay = (ms) => {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          resolve()
-        }, ms)
-      })
-    }
-
-    const retryFetch = (url, retries = 60, retryDelay = 1000) => {
-      return new Promise((resolve, reject) => {
-        const wrapper = n => {
-          nFetch(url)
-            .then(res => { resolve(res) })
-            .catch(async err => {
-              if (n > 0) {
-                console.log(`Retrying to request ${url}. ${n} attempts left.`)
-                await delay(retryDelay)
-                wrapper(--n)
-              } else {
-                reject(err)
-              }
-            })
-        }
-
-        wrapper(retries)
-      })
-    }
-
-    const requestTenor = async () => retryFetch(tenorKeyUrl)
+    const requestTenor = async () => routines.retryFetch(tenorKeyUrl)
       .then(res => res.json())
       .then(async (res) => {
         const anonId = res.anon_id
@@ -203,7 +174,7 @@
         const chosenTag = tags[Math.floor(Math.random() * tags.length)]
         const searchUrl = `https://api.tenor.com/v1/search?tag=${chosenTag}&key=${TENOR_API_KEY}&limit=${TENOR_IMG_LIMIT}&anon_id=${anonId}`
 
-        response = await retryFetch(searchUrl)
+        response = await routines.retryFetch(searchUrl)
 
         return response
       })
