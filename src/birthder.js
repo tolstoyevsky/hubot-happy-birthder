@@ -442,7 +442,6 @@
 
       for (const item of list.users) {
         if (item._id === user.id) {
-          console.log('WTF??? : ' + item.name + ' _ ' + JSON.stringify(item))
           return true
         }
       }
