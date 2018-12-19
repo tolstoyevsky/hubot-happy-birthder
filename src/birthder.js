@@ -105,23 +105,6 @@
   }
 
   /**
-   * Check if the specified user is active.
-   *
-   * @param {Robot} robot - Hubot instance.
-   * @param {string} user - User instance.
-   * @returns {boolean}
-   */
-  async function isUserActive (robot, user) {
-    // It's necessary to get the users list instead of the specified user,
-    // because for some reason it causes the error which is not possible
-    // (at least superficially) to catch.
-    // TODO: solve the issue.
-    const list = await robot.adapter.api.get('users.list')
-    const findUser = list.users.find(item => item._id === user.id)
-    return findUser && findUser.active
-  }
-
-  /**
    * Check if the bot is in the birthday channel.
    *
    * @param {Robot} robot - Hubot instance.
@@ -287,7 +270,7 @@
 
     targetDay.add(-BIRTHDAY_CHANNEL_TTL, 'day')
     for (const bdayUser of findUsersBornOnDate(targetDay, robot.brain.data.users)) {
-      if (await isUserActive(robot, bdayUser)) {
+      if (await routines.isUserActive(robot, bdayUser)) {
         users.push(bdayUser)
       }
     }
@@ -318,7 +301,7 @@
     targetDay.add(amountOfTime, unitOfTime)
 
     for (const bdayUser of findUsersBornOnDate(targetDay, robot.brain.data.users)) {
-      if (await isUserActive(robot, bdayUser)) {
+      if (await routines.isUserActive(robot, bdayUser)) {
         users.push(bdayUser)
       }
     }
@@ -352,7 +335,7 @@
   async function sendCongratulations (robot) {
     let users = []
     for (const bdayUser of findUsersBornOnDate(moment(), robot.brain.data.users)) {
-      if (await isUserActive(robot, bdayUser)) {
+      if (await routines.isUserActive(robot, bdayUser)) {
         users.push(bdayUser)
       }
     }
@@ -413,7 +396,7 @@
 
       for (const i in usersWithoutBirthday) {
         const user = usersWithoutBirthday[i]
-        const valid = await userExists(robot, user) && await isUserActive(robot, user)
+        const valid = await routines.doesUserExist(robot, user) && await routines.isUserActive(robot, user)
         if (valid) formattedArray.push(user)
       }
 
@@ -428,25 +411,6 @@
           robot.messageRoom(BIRTHDAY_LOGGING_CHANNEL, `${userList[0]} did not set the date of birth.`)
         }
       }
-    }
-
-    /**
-     * Check if the specified user exists.
-     *
-     * @param {Robot} robot - Hubot instance.
-     * @param {User} user - User instance.
-     * @returns {boolean}
-     */
-    const userExists = async (robot, user) => {
-      const list = await robot.adapter.api.get('users.list')
-
-      for (const item of list.users) {
-        if (item._id === user.id) {
-          return true
-        }
-      }
-
-      return false
     }
 
     robot.enter(msg => {
@@ -493,7 +457,7 @@
       users = []
 
       for (const u of robot.brain.usersForFuzzyName(name)) {
-        if (await isUserActive(robot, u)) {
+        if (await routines.isUserActive(robot, u)) {
           users.push(u)
         }
       }
@@ -525,7 +489,7 @@
       date = msg.match[2]
 
       for (const u of findUsersBornOnDate(moment(date, SHORT_DATE_FORMAT), robot.brain.data.users)) {
-        if (await isUserActive(robot, u)) {
+        if (await routines.isUserActive(robot, u)) {
           users.push(u)
         }
       }
@@ -552,7 +516,7 @@
       }
 
       for (const u of robot.brain.usersForFuzzyName(name)) {
-        if (await isUserActive(robot, u)) {
+        if (await routines.isUserActive(robot, u)) {
           users.push(u)
         }
       }
@@ -579,7 +543,7 @@
 
       const allUsers = []
       for (const u of Object.values(robot.brain.data.users)) {
-        if (await isUserActive(robot, u)) {
+        if (await routines.isUserActive(robot, u)) {
           allUsers.push(u)
         }
       }
