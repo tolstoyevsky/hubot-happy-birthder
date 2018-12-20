@@ -21,7 +21,7 @@
   const TENOR_API_KEY = process.env.TENOR_API_KEY || ''
   const TENOR_BLACKLIST = process.env.TENOR_BLACKLIST ? process.env.TENOR_BLACKLIST.split(',') : ['641ee5344bdc3f9f4d3ef52344dfe6bd']
   const TENOR_IMG_LIMIT = process.env.TENOR_IMG_LIMIT || 50
-  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'thesimpsonsbirthday,futuramabirthday,gameofthronesbirthday,kingofthehillbirthday,pulpfictionbirthday,rickandmortybirthday,rocketbirthday,sheldonbirthday,simpsonbirthday,tmntbirthday,harrypotterbirthday'
+  const TENOR_SEARCH_TERM = process.env.TENOR_SEARCH_TERM || 'futuramabirthday,gameofthronesbirthday,harrypotterbirthday,kingofthehillbirthday,pulpfictionbirthday,rickandmortybirthday,rocketbirthday,sheldonbirthday,simpsonbirthday,thesimpsonsbirthday,tmntbirthday'
   const BIRTHDAY_CHANNEL_MESSAGE = (process.env.BIRTHDAY_CHANNEL_MESSAGE || '@%username% is having a birthday soon, so let\'s discuss a present.').split('|')
   // Time and measure of it to announce birthdays in advance. For example, 7 days.
   const BIRTHDAY_CHANNEL_BLACKLIST = (process.env.BIRTHDAY_CHANNEL_BLACKLIST || '').split(',')
