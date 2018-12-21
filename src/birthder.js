@@ -9,6 +9,8 @@
 //   hubot birthday set <username> <date>.<month>.<year> - sets a birthday for the user (privileged: admins only)
 //   hubot birthdays on <date>.<month> - shows a list of users with a set birthday date
 //   hubot birthday delete <username> - deletes birthday for the user (privileged: admins only)
+//   hubot fwd set <username> <date>.<month>.<year> - sets a first working day for the user (privileged: admins only)
+//   hubot fwd list - shows a list of users and their first working days
 //
 
 (function () {
@@ -373,7 +375,8 @@
       set: new RegExp(/(birthday set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
       delete: new RegExp(/(birthday delete)\s+/.source + regExpUsername.source + /\b/.source, 'i'),
       check: new RegExp(/(birthdays on)\s+/.source + regExpShortDate.source, 'i'),
-      list: new RegExp(/birthdays list$/, 'i')
+      list: new RegExp(/(birthdays|fwd) list$/, 'i'),
+      fwd_set: new RegExp(/(fwd set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i')
     }
 
     if (TENOR_API_KEY === '') {
@@ -421,6 +424,8 @@
         if (!user.dateOfBirth) {
           robot.adapter.sendDirect({ user: { name: user.name } }, `Welcome to ${COMPANY_NAME}! :tada:\nEmm... where was I?\nOh! Please, enter your date birth (DD.MM.YYYY).`)
         }
+        const today = moment().format(OUTPUT_DATE_FORMAT)
+        user.dateOfFwd = today
       }
     })
 
@@ -537,8 +542,21 @@
       }
     })
 
-    // Print sorted users birthdays.
-    robot.respond(routes.list, async function (msg) {
+    // Print sorted users birthdays and first working days.
+    robot.respond(routes.list, async (msg) => {
+      let attr, desc, title
+
+      if (msg.match[1] === 'birthdays') {
+        attr = 'dateOfBirth'
+        desc = `was born on`
+        title = `Birthdays`
+      }
+      if (msg.match[1] === 'fwd') {
+        attr = 'dateOfFwd'
+        desc = `joined our team`
+        title = `First working days`
+      }
+
       let message
 
       const allUsers = []
@@ -549,28 +567,67 @@
       }
 
       message = allUsers
-        .filter(user => routines.isValidDate(user.dateOfBirth, DATE_FORMAT))
+        .filter(user => routines.isValidDate(user[attr], DATE_FORMAT))
         .map(user => {
           const thisYear = moment().year()
-          const date = moment(user.dateOfBirth, DATE_FORMAT).year(thisYear)
+          const date = moment(user[attr], DATE_FORMAT).year(thisYear)
           const sortedDate = date.unix() >= moment().unix()
             ? date.format(`DD.MM.${date.year() - 1}`) : date.format(`DD.MM.${date.year()}`)
 
           return {
             name: user.name,
-            dateOfBirth: user.dateOfBirth,
+            [attr]: user[attr],
             sortedDate: sortedDate
           }
         })
         .sort((a, b) => sorting(a.sortedDate, b.sortedDate, 'DD.MM.YYYY'))
-        .map(user => ` @${user.name} was born on ${moment(user.dateOfBirth, DATE_FORMAT).format(OUTPUT_DATE_FORMAT)}`)
+        .map(user => ` @${user.name} ${desc} ${moment(user[attr], DATE_FORMAT).format(OUTPUT_DATE_FORMAT)}`)
 
       if (!message.length) {
         msg.send('Oops... No results.')
         return
       }
 
-      msg.send(`*Birthdays list*\n${message.join('\n')}`)
+      msg.send(`*${title} list*\n${message.join('\n')}`)
+    })
+
+    // Reset date of first working day.
+    robot.respond(routes.fwd_set, async (msg) => {
+      let date
+      let name
+      let user
+      let users
+
+      if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
+        msg.send(MSG_PERMISSION_DENIED)
+        return
+      }
+
+      name = msg.match[2].trim()
+      date = msg.match[3]
+      users = []
+
+      for (const u of robot.brain.usersForFuzzyName(name)) {
+        if (await routines.isUserActive(robot, u)) {
+          users.push(u)
+        }
+      }
+
+      if (!routines.isValidDate(date, DATE_FORMAT)) {
+        msg.send(MSG_INVALID_DATE)
+        return
+      }
+
+      if (users.length === 1) {
+        user = users[0]
+        user.dateOfFwd = date
+
+        return msg.send(`Saving ${name}'s first working day.`)
+      } else if (users.length > 1) {
+        return msg.send(getAmbiguousUserText(users))
+      } else {
+        return msg.send(`I have never met ${name}.`)
+      }
     })
 
     // Check regularly if today is someone's birthday, write birthday messages to the general channel.
