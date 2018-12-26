@@ -11,3 +11,4 @@ We thank all the contributors to the project. Here are the full list of the peop
 * [Anton Maksimovich](https://github.com/ABSLord)
 * [Semyon Suprun](https://github.com/BehindLoader)
 * [Denis Buchenko](https://github.com/desa85)
+* [Anna Krokhicheva](https://github.com/Helleborekrox)
