@@ -34,10 +34,11 @@ exp.SHORT_DATE_FORMAT = 'D.M'
 exp.OUTPUT_SHORT_DATE_FORMAT = 'DD.MM'
 exp.OUTPUT_DATE_FORMAT = 'DD.MM.YYYY'
 
-exp.QUOTES_PATH = path.join(__dirname, '/quotes.txt')
-exp.QUOTES = fs.readFileSync(exp.QUOTES_PATH, 'utf8').toString().split('\n')
+exp.BDAY_EVENT_TYPE = 'bday'
+exp.FWD_EVENT_TYPE = 'fwd'
 
 let BIRTHDAY_CHANNEL_MESSAGE_INDEX = 0
+let FWD_MESSAGE_INDEX = 0
 
 exp.sorting = (a, b, format) => {
   const first = moment(a, format)
@@ -47,19 +48,51 @@ exp.sorting = (a, b, format) => {
 }
 
 /**
- * Get the BIRTHDAY_CHANNEL_MESSAGE list and switches the status to the next message.
+ * Get the message for specified event depended on the specified condition.
  *
+ * @param {String} event - Name of the event.
+ * @param {String} condition - Condition which specified how to get message.
  * @returns {String}
  */
-exp.getBirthdayChannelMessage = () => {
-  const result = exp.BIRTHDAY_CHANNEL_MESSAGE[BIRTHDAY_CHANNEL_MESSAGE_INDEX]
+exp.getMessage = (event, condition) => {
+  let fileName
+  let index
 
-  BIRTHDAY_CHANNEL_MESSAGE_INDEX++
-  if (BIRTHDAY_CHANNEL_MESSAGE_INDEX >= exp.BIRTHDAY_CHANNEL_MESSAGE.length) {
-    BIRTHDAY_CHANNEL_MESSAGE_INDEX = 0
+  if (event === exp.FWD_EVENT_TYPE) {
+    fileName = '/anniversary.txt'
+    index = FWD_MESSAGE_INDEX
   }
 
-  return result
+  if (event === exp.BDAY_EVENT_TYPE) {
+    fileName = '/quotes.txt'
+    index = BIRTHDAY_CHANNEL_MESSAGE_INDEX
+  }
+
+  const quotesPath = path.join(__dirname, fileName)
+  let quotes = fs.readFileSync(quotesPath, 'utf8').split('\n')
+
+  if (condition === 'index') {
+    if (event === exp.BDAY_EVENT_TYPE) {
+      quotes = exp.BIRTHDAY_CHANNEL_MESSAGE
+    }
+    const result = quotes[index]
+
+    index++
+    if (index >= quotes.length) {
+      index = 0
+    }
+
+    if (event === exp.FWD_EVENT_TYPE) {
+      FWD_MESSAGE_INDEX = index
+    } else {
+      BIRTHDAY_CHANNEL_MESSAGE_INDEX = index
+    }
+
+    return result
+  }
+  if (condition === 'random') {
+    return quotes[(Math.random() * quotes.length) >> 0]
+  }
 }
 
 /**
@@ -70,7 +103,7 @@ exp.getBirthdayChannelMessage = () => {
  * @returns {Void}
  */
 exp.createBirthdayChannel = async (robot, username) => {
-  const message = exp.getBirthdayChannelMessage()
+  const message = exp.getMessage(exp.BDAY_EVENT_TYPE, 'index')
     .replace(/%username%/g, username)
   const now = moment()
   const dayMonth = now.format('DD.MM')
@@ -193,33 +226,34 @@ exp.isEqualMonthDay = (firstDate, secondsDate) => {
 }
 
 /**
- * Find the users who have the same birthday.
+ * Find the users who have the event in the specified date.
  *
+ * @param {String} event - Name of the event.
  * @param {Date} date - Date which will be used for the comparison.
  * @param {Object} users - User object where each key is the user instance.
  * @returns {Array}
  */
-exp.findUsersBornOnDate = (date, users) => {
+exp.findUsersByDate = (event, date, users) => {
   let matches = []
+  let attr
+
+  if (event === exp.BDAY_EVENT_TYPE) {
+    attr = 'dateOfBirth'
+  }
+
+  if (event === exp.FWD_EVENT_TYPE) {
+    attr = 'dateOfFwd'
+  }
 
   for (let user of Object.values(users)) {
-    if (routines.isValidDate(user.dateOfBirth, exp.DATE_FORMAT)) {
-      if (exp.isEqualMonthDay(date, moment(user.dateOfBirth, exp.DATE_FORMAT))) {
+    if (routines.isValidDate(user[attr], exp.DATE_FORMAT)) {
+      if (exp.isEqualMonthDay(date, moment(user[attr], exp.DATE_FORMAT))) {
         matches.push(user)
       }
     }
   }
 
   return matches
-}
-
-/**
- * Get a random quote from the QUOTES array.
- *
- * @returns {string}
- */
-exp.quote = () => {
-  return exp.QUOTES[(Math.random() * exp.QUOTES.length) >> 0]
 }
 
 /**
@@ -241,6 +275,29 @@ exp.formReminderMessage = (users, targetDay, amountOfTime) => {
 }
 
 /**
+ * Form a fwd message by concatenate usernames and years of being worker.
+ *
+ * @param {Array} users - Users to be congratulated.
+ * @returns {string}
+ */
+exp.formFwdMessage = (users) => {
+  let count = []
+
+  for (const user of users) {
+    const dateOfFwd = moment(user.dateOfFwd, exp.DATE_FORMAT)
+    let diff = moment().diff(dateOfFwd, 'years')
+    if (diff) {
+      let cases = diff > 1 ? 'years' : 'year'
+      count.push(`@${user.name} has been a part of our team for ${diff} ${cases}`)
+    }
+  }
+  if (count) {
+    return `${count.join(' and\n')}`
+  }
+  return ''
+}
+
+/**
  * Find all the birthdays which were yesterday and remove the channels created for them.
  *
  * @param {Robot} robot - Hubot instance.
@@ -256,7 +313,7 @@ exp.removeExpiredBirthdayChannels = async (robot) => {
   let channelName
 
   targetDay.add(-exp.BIRTHDAY_CHANNEL_TTL, 'day')
-  for (const bdayUser of exp.findUsersBornOnDate(targetDay, robot.brain.data.users)) {
+  for (const bdayUser of exp.findUsersByDate(exp.BDAY_EVENT_TYPE, targetDay, robot.brain.data.users)) {
     if (await routines.isUserActive(robot, bdayUser)) {
       users.push(bdayUser)
     }
@@ -287,7 +344,7 @@ exp.sendReminders = async (robot, amountOfTime, unitOfTime) => {
 
   targetDay.add(amountOfTime, unitOfTime)
 
-  for (const bdayUser of exp.findUsersBornOnDate(targetDay, robot.brain.data.users)) {
+  for (const bdayUser of exp.findUsersByDate(exp.BDAY_EVENT_TYPE, targetDay, robot.brain.data.users)) {
     if (await routines.isUserActive(robot, bdayUser)) {
       users.push(bdayUser)
     }
@@ -315,29 +372,54 @@ exp.sendReminders = async (robot, amountOfTime, unitOfTime) => {
 }
 
 /**
- * Write birthday messages to the general channel.
+ * Write congratulation messages to the general channel.
  *
  * @param {Object} robot - Hubot instance.
+ * @param {String} event - Name of the event to form congratulation.
  */
-exp.sendCongratulations = async (robot) => {
-  let users = []
-  for (const bdayUser of exp.findUsersBornOnDate(moment(), robot.brain.data.users)) {
-    if (await routines.isUserActive(robot, bdayUser)) {
-      users.push(bdayUser)
+exp.sendCongratulations = async (robot, event) => {
+  let messageText
+  let sortedUsers = []
+  let tenor
+
+  for (const user of exp.findUsersByDate(event, moment(), robot.brain.data.users)) {
+    if (await routines.isUserActive(robot, user)) {
+      sortedUsers.push(user)
     }
   }
 
-  if (users.length > 0) {
-    let userNames = users.map(user => `@${user.name}`)
-    let messageText = `Today is birthday of ${userNames.join(' and ')}!\n${exp.quote()}`
-    exp.grabTenorImage()
-      .then(function (imageUrl) {
-        robot.messageRoom('general', `${imageUrl || ''}\n${messageText}`)
-      })
-      .catch((e) => {
-        robot.messageRoom('general', messageText)
-        routines.rave(robot, e)
-      })
+  if (sortedUsers.length > 0) {
+    let userNames = sortedUsers.map(user => `@${user.name}`)
+
+    if (event === exp.BDAY_EVENT_TYPE) {
+      messageText = `Today is birthday of ${userNames.join(' and ')}!\n${exp.getMessage(event, 'random')}`
+      tenor = true
+    }
+
+    if (event === exp.FWD_EVENT_TYPE) {
+      let message = exp.formFwdMessage(sortedUsers)
+
+      if (!message) {
+        return
+      }
+
+      let congrat = exp.getMessage(event, 'index')
+      messageText = `${congrat}\n${message}!`
+      tenor = false
+    }
+
+    if (tenor) {
+      exp.grabTenorImage()
+        .then(function (imageUrl) {
+          robot.messageRoom('general', `${imageUrl || ''}\n${messageText}`)
+        })
+        .catch((e) => {
+          robot.messageRoom('general', messageText)
+          routines.rave(robot, e)
+        })
+    } else {
+      robot.messageRoom('general', messageText)
+    }
   }
 }
 

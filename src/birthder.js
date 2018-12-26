@@ -126,7 +126,7 @@
 
       date = msg.match[2]
 
-      for (const u of utils.findUsersBornOnDate(moment(date, utils.SHORT_DATE_FORMAT), robot.brain.data.users)) {
+      for (const u of utils.findUsersByDate(utils.BDAY_EVENT_TYPE, moment(date, utils.SHORT_DATE_FORMAT), robot.brain.data.users)) {
         if (await routines.isUserActive(robot, u)) {
           users.push(u)
         }
@@ -265,7 +265,12 @@
 
     // Check regularly if today is someone's birthday, write birthday messages to the general channel.
     if (utils.HAPPY_REMINDER_SCHEDULER) {
-      schedule.scheduleJob(utils.HAPPY_REMINDER_SCHEDULER, () => utils.sendCongratulations(robot))
+      schedule.scheduleJob(utils.HAPPY_REMINDER_SCHEDULER, () => utils.sendCongratulations(robot, utils.BDAY_EVENT_TYPE))
+    }
+
+    // Check regularly if today is someone's anniversary day, write congratulation message to the general channel.
+    if (utils.HAPPY_REMINDER_SCHEDULER) {
+      schedule.scheduleJob(utils.HAPPY_REMINDER_SCHEDULER, () => utils.sendCongratulations(robot, utils.FWD_EVENT_TYPE))
     }
 
     // test
