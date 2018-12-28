@@ -10,9 +10,9 @@
 //    hubot birthdays on <date>.<month> - shows a list of users with a set birthday date
 //    hubot fwd list - shows a list of users and their first working days
 //    begin admin
-//      hubot birthday set <username> <date>.<month>.<year> - sets a birthday for the user
-//      hubot birthday delete <username> - deletes birthday for the user
-//      hubot fwd set <username> <date>.<month>.<year> - sets a first working day for the user
+//      hubot birthday set @username <date>.<month>.<year> - sets a birthday for the user
+//      hubot birthday delete @username - deletes birthday for the user
+//      hubot fwd set @username <date>.<month>.<year> - sets a first working day for the user
 //    end admin
 //   end group
 //
