@@ -1,9 +1,6 @@
 // Description:
 //   Birthday bot.
 //
-// Configuration:
-//   None
-//
 // Commands:
 //   begin group Happy Birthder
 //    hubot birthdays list - shows a list of users and their birthdays
