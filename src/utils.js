@@ -108,7 +108,7 @@ exp.createBirthdayChannel = async (robot, username) => {
   const now = moment()
   const dayMonth = now.format('DD.MM')
   const channelName = `${username}-birthday-channel-${dayMonth}-id${now.milliseconds()}`
-  const users = Object.values(robot.brain.data.users)
+  const users = await routines.getAllUsers(robot)
     .filter(user => {
       return user.name !== username && !exp.BIRTHDAY_CHANNEL_BLACKLIST.includes(user.name)
     })
@@ -117,7 +117,7 @@ exp.createBirthdayChannel = async (robot, username) => {
     name: channelName,
     members: users
   })
-  const userInstance = robot.brain.userForName(username)
+  const userInstance = await routines.findUserByName(robot, username)
   userInstance.birthdayChannel = {
     roomName: channelName
   }
@@ -132,7 +132,7 @@ exp.createBirthdayChannel = async (robot, username) => {
  * @returns {boolean}
  */
 exp.isBotInBirthdayChannel = async (robot, username) => {
-  const userInstance = robot.brain.userForName(username)
+  const userInstance = await routines.findUserByName(robot, username)
   if (userInstance.birthdayChannel) {
     return true
   }
@@ -308,21 +308,17 @@ exp.removeExpiredBirthdayChannels = async (robot) => {
     return
   }
 
-  let targetDay = moment()
-  let users = []
   let channelName
 
+  let targetDay = moment()
   targetDay.add(-exp.BIRTHDAY_CHANNEL_TTL, 'day')
-  for (const bdayUser of exp.findUsersByDate(exp.BDAY_EVENT_TYPE, targetDay, robot.brain.data.users)) {
-    if (await routines.isUserActive(robot, bdayUser)) {
-      users.push(bdayUser)
-    }
-  }
+  let allUsers = await routines.getAllUsers(robot)
+  let users = exp.findUsersByDate(exp.BDAY_EVENT_TYPE, targetDay, allUsers)
 
   if (users.length) {
     for (let user of users) {
       if (await exp.isBotInBirthdayChannel(robot, user.name)) {
-        const userInstance = robot.brain.userForName(user.name)
+        const userInstance = await routines.findUserByName(robot, user.name)
         if (userInstance.birthdayChannel) {
           channelName = userInstance.birthdayChannel.roomName
           await robot.adapter.api.post('groups.delete', { roomName: channelName })
@@ -340,15 +336,12 @@ exp.removeExpiredBirthdayChannels = async (robot) => {
  */
 exp.sendReminders = async (robot, amountOfTime, unitOfTime) => {
   let targetDay = moment()
-  let users = []
+  let allUsers
+  let users
 
   targetDay.add(amountOfTime, unitOfTime)
-
-  for (const bdayUser of exp.findUsersByDate(exp.BDAY_EVENT_TYPE, targetDay, robot.brain.data.users)) {
-    if (await routines.isUserActive(robot, bdayUser)) {
-      users.push(bdayUser)
-    }
-  }
+  allUsers = await routines.getAllUsers(robot)
+  users = exp.findUsersByDate(exp.BDAY_EVENT_TYPE, targetDay, allUsers)
 
   if (users.length > 0) {
     if (exp.CREATE_BIRTHDAY_CHANNELS) {
@@ -359,7 +352,6 @@ exp.sendReminders = async (robot, amountOfTime, unitOfTime) => {
       }
     }
 
-    const allUsers = Object.values(robot.brain.data.users)
     for (let user of allUsers) {
       const filteredUsers = users.filter(item => item.name !== user.name)
       if (!filteredUsers.length) {
@@ -379,14 +371,10 @@ exp.sendReminders = async (robot, amountOfTime, unitOfTime) => {
  */
 exp.sendCongratulations = async (robot, event) => {
   let messageText
-  let sortedUsers = []
   let tenor
 
-  for (const user of exp.findUsersByDate(event, moment(), robot.brain.data.users)) {
-    if (await routines.isUserActive(robot, user)) {
-      sortedUsers.push(user)
-    }
-  }
+  const allUsers = await routines.getAllUsers(robot)
+  const sortedUsers = exp.findUsersByDate(event, moment(), allUsers)
 
   if (sortedUsers.length > 0) {
     let userNames = sortedUsers.map(user => `@${user.name}`)
@@ -432,20 +420,13 @@ exp.sendCongratulations = async (robot, event) => {
  * @return {void}
  */
 exp.detectBirthdaylessUsers = async robot => {
-  let usersWithoutBirthday = Object.values(robot.brain.data.users)
+  const usersWithoutBirthday = (await routines.getAllUsers(robot))
     .filter(user => !user.dateOfBirth)
-  let formattedArray = []
 
-  for (const i in usersWithoutBirthday) {
-    const user = usersWithoutBirthday[i]
-    const valid = await routines.doesUserExist(robot, user) && await routines.isUserActive(robot, user)
-    if (valid) formattedArray.push(user)
-  }
-
-  for (const user of formattedArray) {
+  for (const user of usersWithoutBirthday) {
     robot.adapter.sendDirect({ user: { name: user.name } }, 'Hmm... \nIt looks like you forgot to set the date of birth. \nPlease enter it (DD.MM.YYYY).')
   }
-  const userList = formattedArray.map(user => ` @${user.name} `)
+  const userList = usersWithoutBirthday.map(user => ` @${user.name} `)
   if (userList.length) {
     if (userList.length > 1) {
       robot.messageRoom(exp.BIRTHDAY_LOGGING_CHANNEL, `There are the users who did not set the date of birth:\n${userList.join('\n')}`)
