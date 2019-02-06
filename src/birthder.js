@@ -179,6 +179,20 @@
     robot.respond(routes.list, async (msg) => {
       let attr, desc, title
 
+      const getSortedDate = (date) => {
+        if (attr === 'dateOfBirth') {
+          const thisYear = moment().year()
+          const newDate = moment(date, utils.DATE_FORMAT).year(thisYear)
+
+          return newDate.unix() >= moment().unix()
+            ? newDate.format(`DD.MM.${newDate.year() - 1}`) : newDate.format(`DD.MM.${newDate.year()}`)
+        }
+
+        if (attr === 'dateOfFwd') {
+          return date
+        }
+      }
+
       if (msg.match[1] === 'birthdays') {
         attr = 'dateOfBirth'
         desc = `was born on`
@@ -202,10 +216,7 @@
       message = allUsers
         .filter(user => routines.isValidDate(user[attr], utils.DATE_FORMAT))
         .map(user => {
-          const thisYear = moment().year()
-          const date = moment(user[attr], utils.DATE_FORMAT).year(thisYear)
-          const sortedDate = date.unix() >= moment().unix()
-            ? date.format(`DD.MM.${date.year() - 1}`) : date.format(`DD.MM.${date.year()}`)
+          const sortedDate = getSortedDate(user[attr])
 
           return {
             name: user.name,
