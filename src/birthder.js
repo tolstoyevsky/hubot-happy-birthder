@@ -41,7 +41,9 @@
       delete: new RegExp(/(birthday delete)\s+/.source + regExpUsername.source + /\b/.source, 'i'),
       check: new RegExp(/(birthdays on)\s+/.source + regExpShortDate.source, 'i'),
       list: new RegExp(/(birthdays|fwd) list$/, 'i'),
-      fwd_set: new RegExp(/(fwd set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i')
+      fwd_set: new RegExp(/(fwd set)\s+/.source + regExpUsername.source + /\s+/.source + regExpDate.source, 'i'),
+      agreeToPitchIn: new RegExp(/Yes, I'll pitch in on a present for\s+/.source + regExpUsername.source, 'i'),
+      disagreeToPitchIn: new RegExp(/No, I won't pitch in on a present for\s+/.source + regExpUsername.source, 'i')
     }
 
     if (utils.TENOR_API_KEY === '') {
@@ -235,6 +237,62 @@
       msg.send(`*${title} list*\n${message.join('\n')}`)
     })
 
+    robot.respond(routes.agreeToPitchIn, async msg => {
+      const targetUsername = msg.match[1]
+      const bdayUser = await routines.findUserByName(robot, targetUsername)
+
+      if (!bdayUser) {
+        msg.send(`I have never met ${targetUsername}.`)
+
+        return
+      }
+
+      if (!bdayUser.birthdayChannel) {
+        msg.send('This person does not plan to celebrate their birthday in the nearest future. Do not rush.')
+
+        return
+      }
+
+      bdayUser.birthdayPitchingInList = bdayUser.birthdayPitchingInList || []
+
+      if (bdayUser.birthdayPitchingInList.includes(msg.message.user.id)) {
+        msg.send('You have already told me that you would.')
+      } else {
+        bdayUser.birthdayPitchingInList.push(msg.message.user.id)
+
+        msg.send('Fine! We count on you.')
+      }
+    })
+
+    robot.respond(routes.disagreeToPitchIn, async msg => {
+      const targetUsername = msg.match[1]
+      const bdayUser = await routines.findUserByName(robot, targetUsername)
+
+      if (!bdayUser) {
+        msg.send(`I have never met ${targetUsername}.`)
+
+        return
+      }
+
+      if (!bdayUser.birthdayChannel) {
+        msg.send('This person does not plan to celebrate their birthday in the nearest future. Do not rush.')
+
+        return
+      }
+
+      bdayUser.birthdayPitchingInList = bdayUser.birthdayPitchingInList || []
+
+      if (bdayUser.birthdayPitchingInList.includes(msg.message.user.id)) {
+        bdayUser.birthdayPitchingInList = bdayUser.birthdayPitchingInList.filter(
+          userId => userId !== msg.message.user.id
+        )
+
+        msg.send('It\'s a shame. I will remove you from the pitching in list.')
+      } else {
+        msg.send('Ok, I understand.')
+      }
+    })
+
     // Reset date of first working day.
     robot.respond(routes.fwd_set, async (msg) => {
       let date
@@ -302,6 +360,10 @@
 
     if (utils.HAPPY_REMINDER_SCHEDULER) {
       schedule.scheduleJob(utils.HAPPY_REMINDER_SCHEDULER, () => utils.detectBirthdaylessUsers(robot))
+    }
+
+    if (utils.HAPPY_REMINDER_SCHEDULER) {
+      schedule.scheduleJob(utils.HAPPY_REMINDER_SCHEDULER, () => utils.sendReminderOfBegging(robot))
     }
   }
 }).call(this)

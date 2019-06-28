@@ -61,6 +61,7 @@ The script can be configured via the following environment variables (called par
 | `COMPANY_NAME` | Allows specifying the company name which is used in the welcome message. | WIS Software |
 | `HAPPY_REMINDER_SCHEDULER` | Allows specifying the frequency with which the script checks for nearest birthdays and writes birthday messages to users. The value of this parameter must follow the [Cron Format](https://github.com/node-schedule/node-schedule#cron-style-scheduling). | `0 0 7 * * *` |
 | `NUMBER_OF_DAYS_IN_ADVANCE`  | Sets (in days) how long before the event occurs the reminder will be triggered. | 7 |
+| `ENABLE_PITCHING_IN_SURVEY` | Specifies whether to create a pitching in survey. If the parameter is `true`, the bot asks every single user except the birthday boy/girl whether they will pitch in on a present for the birthday. | false |
 
 ## Example Interaction
 
