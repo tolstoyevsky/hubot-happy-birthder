@@ -18,6 +18,7 @@ exp.COMPANY_NAME = process.env.COMPANY_NAME || 'WIS Software'
 exp.CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
 exp.HAPPY_REMINDER_SCHEDULER = process.env.HAPPY_REMINDER_SCHEDULER || '0 0 7 * * *'
 exp.NUMBER_OF_DAYS_IN_ADVANCE = parseInt(process.env.NUMBER_OF_DAYS_IN_ADVANCE, 10) || 7
+exp.ENABLE_PITCHING_IN_SURVEY = process.env.ENABLE_PITCHING_IN_SURVEY === 'true' || false
 
 exp.MSG_PERMISSION_DENIED = 'Permission denied.'
 exp.MSG_INVALID_DATE = 'Invalid date format. Try again.'
@@ -122,6 +123,31 @@ exp.createBirthdayChannel = async (robot, username) => {
     roomName: channelName
   }
   robot.messageRoom(channelName, message)
+}
+
+/**
+ * Create a pitching in survey for all users except the birthday boy/girl.
+ *
+ * @param {Robot} robot - hubot instance
+ * @param {object} bdayUser - birthday boy/girl
+ */
+exp.createPitchingInSurvey = (robot, bdayUser) => {
+  return routines.getAllUsers(robot)
+    .then(users => {
+      users
+        .filter(user => user.id !== bdayUser.id)
+        .forEach(user => {
+          const text = `Hello. ${bdayUser.name} is having a birthday soon. We are pitching in on the present. Are you in? This is a completely anonymous survey. We simply need to know the number of the people who are going to pitch in.`
+          const message = routines.buildMessageWithButtons(
+            text,
+            [
+              ['Yes. I can', `Yes, I'll pitch in on a present for ${bdayUser.name}`],
+              ['Sorry, but no', `No, I won't pitch in on a present for ${bdayUser.name}`]
+            ]
+          )
+          robot.adapter.sendDirect({ user: { name: user.name } }, message)
+        })
+    })
 }
 
 /**
@@ -327,6 +353,7 @@ exp.removeExpiredBirthdayChannels = async (robot) => {
           channelName = userInstance.birthdayChannel.roomName
           await robot.adapter.api.post('groups.delete', { roomName: channelName })
           delete userInstance.birthdayChannel
+          delete userInstance.birthdayPitchingInList
         }
       }
     }
@@ -351,11 +378,15 @@ exp.sendReminders = async (robot, amountOfTime, unitOfTime) => {
   }
 
   if (users.length > 0) {
-    if (exp.CREATE_BIRTHDAY_CHANNELS) {
-      for (let user of users) {
-        if (!await exp.isBotInBirthdayChannel(robot, user.name)) {
+    for (let user of users) {
+      if (!await exp.isBotInBirthdayChannel(robot, user.name)) {
+        if (exp.CREATE_BIRTHDAY_CHANNELS) {
           await exp.createBirthdayChannel(robot, user.name)
         }
+      }
+
+      if (exp.ENABLE_PITCHING_IN_SURVEY) {
+        await exp.createPitchingInSurvey(robot, user)
       }
     }
 
@@ -453,4 +484,31 @@ exp.detectBirthdaylessUsers = async robot => {
       robot.messageRoom(exp.BIRTHDAY_LOGGING_CHANNEL, `${userList[0]} did not set the date of birth.`)
     }
   }
+}
+
+/**
+ * Inform everybody in the birthday channel about the number of people who agreed to pitch in.
+ *
+ * @param {Robot} robot - hubot instance.
+ */
+exp.sendReminderOfBegging = async (robot) => {
+  const targetDay = moment().add(5, 'days')
+  const users = await routines.getAllUsers(robot)
+
+  return users
+    .filter(user => {
+      return exp.isEqualMonthDay(
+        moment(user.dateOfBirth, exp.DATE_FORMAT),
+        targetDay
+      )
+    })
+    .forEach(user => {
+      const all = users.length - 1
+      const agreed = (user.birthdayPitchingInList || []).length
+      const toBe = agreed > 1 ? 'are' : 'is'
+
+      const message = `Good news, @all\n${agreed} out of ${all} ${toBe} going to pitch in.`
+
+      robot.messageRoom(user.birthdayChannel.roomName, message)
+    })
 }
