@@ -492,7 +492,7 @@ exp.detectBirthdaylessUsers = async robot => {
  * @param {Robot} robot - hubot instance.
  */
 exp.sendReminderOfBegging = async (robot) => {
-  const targetDay = moment().add(5, 'days')
+  const targetDay = moment().add(4, 'days')
   const users = await routines.getAllUsers(robot)
 
   return users
