@@ -51,11 +51,10 @@
       return
     }
 
-    robot.enter(msg => {
+    robot.enter(async msg => {
       if (msg.message.user.roomID === 'GENERAL') {
-        const brain = robot.brain.data.users
         const username = msg.message.user.name
-        const user = Object.values(brain).filter(item => item.name === username).shift()
+        const user = await routines.findUserByName(robot, username)
         if (!user.dateOfBirth) {
           robot.adapter.sendDirect({ user: { name: user.name } }, `Welcome to ${utils.COMPANY_NAME}! :tada:\nEmm... where was I?\nOh! Please, enter your date birth (DD.MM.YYYY).`)
         }
@@ -85,7 +84,6 @@
       let date
       let name
       let user
-      let users
 
       if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(utils.MSG_PERMISSION_DENIED)
@@ -94,26 +92,17 @@
 
       name = msg.match[2].trim()
       date = msg.match[3]
-      users = []
-
-      for (const u of robot.brain.usersForFuzzyName(name)) {
-        if (await routines.isUserActive(robot, u)) {
-          users.push(u)
-        }
-      }
+      user = await routines.findUserByName(robot, name)
 
       if (!routines.isValidDate(date, utils.DATE_FORMAT)) {
         msg.send(utils.MSG_INVALID_DATE)
         return
       }
 
-      if (users.length === 1) {
-        user = users[0]
+      if (user) {
         user.dateOfBirth = date
 
         return msg.send(`Saving ${name}'s birthday.`)
-      } else if (users.length > 1) {
-        return msg.send(utils.getAmbiguousUserText(users))
       } else {
         return msg.send(`I have never met ${name}.`)
       }
@@ -121,18 +110,16 @@
 
     // Print the users names whose birthdays match the specified date.
     robot.respond(routes.check, async (msg) => {
+      let allUsers
       let date
       let message
-      let users = []
+      let users
       let userNames
 
-      date = msg.match[2]
+      date = moment(msg.match[2], utils.SHORT_DATE_FORMAT)
 
-      for (const u of utils.findUsersByDate(utils.BDAY_EVENT_TYPE, moment(date, utils.SHORT_DATE_FORMAT), robot.brain.data.users)) {
-        if (await routines.isUserActive(robot, u)) {
-          users.push(u)
-        }
-      }
+      allUsers = await routines.getAllUsers(robot)
+      users = utils.findUsersByDate(utils.BDAY_EVENT_TYPE, date, allUsers)
 
       if (users.length === 0) {
         return msg.send('Could not find any user with the specified birthday.')
@@ -147,22 +134,14 @@
     // Delete the birthday associated with the specified user name.
     robot.respond(routes.delete, async (msg) => {
       let name = msg.match[2].trim()
-      let user
-      let users = []
+      let user = await routines.findUserByName(robot, name)
 
       if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(utils.MSG_PERMISSION_DENIED)
         return
       }
 
-      for (const u of robot.brain.usersForFuzzyName(name)) {
-        if (await routines.isUserActive(robot, u)) {
-          users.push(u)
-        }
-      }
-
-      if (users.length === 1) {
-        user = users[0]
+      if (user) {
         if (!user.dateOfBirth) {
           return msg.send('A birth date is not specified for the user.')
         }
@@ -170,8 +149,6 @@
         user.dateOfBirth = null
 
         return msg.send(`Removing ${name}'s birthday.`)
-      } else if (users.length > 1) {
-        return msg.send(utils.getAmbiguousUserText(users))
       } else {
         return msg.send(`I have never met ${name}.`)
       }
@@ -207,13 +184,7 @@
       }
 
       let message
-
-      const allUsers = []
-      for (const u of Object.values(robot.brain.data.users)) {
-        if (await routines.isUserActive(robot, u)) {
-          allUsers.push(u)
-        }
-      }
+      const allUsers = await routines.getAllUsers(robot)
 
       message = allUsers
         .filter(user => routines.isValidDate(user[attr], utils.DATE_FORMAT))
@@ -298,7 +269,6 @@
       let date
       let name
       let user
-      let users
 
       if (!await routines.isAdmin(robot, msg.message.user.name.toString())) {
         msg.send(utils.MSG_PERMISSION_DENIED)
@@ -307,26 +277,17 @@
 
       name = msg.match[2].trim()
       date = msg.match[3]
-      users = []
-
-      for (const u of robot.brain.usersForFuzzyName(name)) {
-        if (await routines.isUserActive(robot, u)) {
-          users.push(u)
-        }
-      }
+      user = await routines.findUserByName(robot, name)
 
       if (!routines.isValidDate(date, utils.DATE_FORMAT)) {
         msg.send(utils.MSG_INVALID_DATE)
         return
       }
 
-      if (users.length === 1) {
-        user = users[0]
+      if (user) {
         user.dateOfFwd = date
 
         return msg.send(`Saving ${name}'s first working day.`)
-      } else if (users.length > 1) {
-        return msg.send(utils.getAmbiguousUserText(users))
       } else {
         return msg.send(`I have never met ${name}.`)
       }
