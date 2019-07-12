@@ -383,10 +383,10 @@ exp.sendReminders = async (robot, amountOfTime, unitOfTime) => {
         if (exp.CREATE_BIRTHDAY_CHANNELS) {
           await exp.createBirthdayChannel(robot, user.name)
         }
-      }
 
-      if (exp.ENABLE_PITCHING_IN_SURVEY) {
-        await exp.createPitchingInSurvey(robot, user)
+        if (exp.ENABLE_PITCHING_IN_SURVEY) {
+          await exp.createPitchingInSurvey(robot, user)
+        }
       }
     }
 
