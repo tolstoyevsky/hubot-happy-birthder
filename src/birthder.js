@@ -64,6 +64,54 @@
       }
     })
 
+    robot.respond(/(Hi. I got a job (.*))\s*/i, msg => {
+      const user = msg.message.user
+
+      if (typeof user.position !== 'boolean') {
+        msg.send('I already know that you works with us :wink:')
+
+        return
+      }
+
+      const messageText = `Are you sure you're an ${msg.match[2]}?`
+      const options = [
+        ['Yes', `Yes. I am definitely ${msg.match[2]}`],
+        ['No', 'No. I have incorrectly indicated my position']
+      ]
+      msg.send(routines.buildMessageWithButtons(messageText, options))
+    })
+
+    robot.respond(/(Yes. I am definitely (.*)|(No. I have incorrectly indicated my position))/i, msg => {
+      const user = msg.message.user
+
+      if (typeof user.position !== 'boolean') {
+        msg.send('I already know that you works with us :wink:')
+
+        return
+      }
+
+      if (msg.match[1].toLowerCase() === 'no. i have incorrectly indicated my position') {
+        const messageText = 'So. Who are you?,'
+        const options = utils.EMPLOYEE_OCCUPATION
+          .split(',')
+          .map(item => [item, `Hi. I got a job ${item}`])
+
+        const message = routines.buildMessageWithButtons(messageText, options)
+
+        msg.send(message)
+
+        return
+      }
+
+      msg.send('Ok. Thank you for your time')
+      const position = msg.match[2].toLowerCase()
+      const message = `Let's welcome our new ${position} - @${user.name} :tada:`
+
+      robot.messageRoom('general', message)
+
+      user.position = position
+    })
+
     robot.respond(regExpDate, msg => {
       const username = msg.message.user.name
       const user = robot.brain.userForName(username)
@@ -74,6 +122,16 @@
           user.dateOfBirth = date
           msg.send('I memorized you birthday, well done! :wink:')
           robot.messageRoom(utils.BIRTHDAY_LOGGING_CHANNEL, `All right, @${user.name}'s birthday was specified!`)
+          // Next step is send check to new employee
+          if (utils.EMPLOYEE_OCCUPATION) {
+            const messageText = 'What is your position?'
+            const options = utils.EMPLOYEE_OCCUPATION
+              .split(',')
+              .map(item => [item, `Hi. I got a job ${item}`])
+            const message = routines.buildMessageWithButtons(messageText, options)
+            robot.adapter.sendDirect({ user: { name: user.name } }, message)
+            user.position = false
+          }
         } else {
           msg.send(utils.MSG_INVALID_DATE)
         }

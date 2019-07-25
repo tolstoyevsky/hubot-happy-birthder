@@ -16,6 +16,7 @@ exp.BIRTHDAY_CHANNEL_TTL = parseInt(process.env.BIRTHDAY_CHANNEL_TTL, 10) || 3
 exp.BIRTHDAY_LOGGING_CHANNEL = process.env.BIRTHDAY_LOGGING_CHANNEL || 'hr'
 exp.COMPANY_NAME = process.env.COMPANY_NAME || 'WIS Software'
 exp.CREATE_BIRTHDAY_CHANNELS = process.env.CREATE_BIRTHDAY_CHANNELS === 'true' || false
+exp.EMPLOYEE_OCCUPATION = process.env.EMPLOYEE_OCCUPATION || 'Frontend developer,Backend Developer,Office manager'
 exp.HAPPY_REMINDER_SCHEDULER = process.env.HAPPY_REMINDER_SCHEDULER || '0 0 7 * * *'
 exp.NUMBER_OF_DAYS_IN_ADVANCE = parseInt(process.env.NUMBER_OF_DAYS_IN_ADVANCE, 10) || 7
 exp.ENABLE_PITCHING_IN_SURVEY = process.env.ENABLE_PITCHING_IN_SURVEY === 'true' || false
